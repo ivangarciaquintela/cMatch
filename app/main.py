@@ -44,7 +44,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = User(
         email=user.email,
         username=user.username,
-        hashed_password=hashed_password
+        password_hash=hashed_password
     )
     db.add(db_user)
     db.commit()
@@ -57,7 +57,7 @@ def login_for_access_token(
     db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.email == form_data.username).first()
-    if not user or not auth.verify_password(form_data.password, user.hashed_password):
+    if not user or not auth.verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
