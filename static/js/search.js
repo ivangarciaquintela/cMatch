@@ -227,4 +227,72 @@ function init() {
     }
 }
 
+async function handleWishlistAdd(product, token) {
+    try {
+        const response = await fetch('/api/wishlist/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                item_name: product.name,
+                item_description: product.description || '',
+                item_price: product.price?.value?.current || 0,
+                item_url: product.link,
+                item_image: product.imageUrl || '',
+                item_brand: product.brand || '',
+                item_category: product.category || ''
+            })
+        });
+
+        if (response.ok) {
+            alert('Item added to wishlist successfully!');
+        } else if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login';
+        } else {
+            const error = await response.json();
+            alert(`Failed to add item to wishlist: ${error.detail}`);
+        }
+    } catch (error) {
+        console.error('Error adding to wishlist:', error);
+        alert('Failed to add item to wishlist. Please try again.');
+    }
+}
+
+async function handleClosetAdd(product, token) {
+    try {
+        const response = await fetch('/api/closet/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                item_name: product.name,
+                item_description: product.description || '',
+                item_price: product.price?.value?.current || 0,
+                item_url: product.link,
+                item_image: product.imageUrl || '',
+                item_brand: product.brand || '',
+                item_category: product.category || ''
+            })
+        });
+
+        if (response.ok) {
+            alert('Item added to closet successfully!');
+        } else if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login';
+        } else {
+            const error = await response.json();
+            alert(`Failed to add item to closet: ${error.detail}`);
+        }
+    } catch (error) {
+        console.error('Error adding to closet:', error);
+        alert('Failed to add item to closet. Please try again.');
+    }
+}
+
 init(); 

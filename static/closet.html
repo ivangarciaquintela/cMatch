@@ -43,7 +43,7 @@
             if (!token) return;
 
             try {
-                const response = await fetch('/api/closet/', {
+                const response = await fetch('/api/closet/list', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

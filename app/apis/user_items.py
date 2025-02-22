@@ -49,7 +49,7 @@ async def get_current_user(token: str = Depends(auth.oauth2_scheme), db: Session
     return user
 
 # Wishlist endpoints
-@router.post("/wishlist/", response_model=Item)
+@router.post("/wishlist/add", response_model=Item)
 async def create_wishlist_item(
     item: ItemCreate,
     current_user: User = Depends(get_current_user),
@@ -85,7 +85,7 @@ async def create_wishlist_item(
             detail=str(e)
         )
 
-@router.get("/wishlist/", response_model=List[Item])
+@router.get("/wishlist/list", response_model=List[Item])
 async def get_wishlist_items(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -130,7 +130,7 @@ async def delete_wishlist_item(
     return {"message": "Item deleted successfully"}
 
 # Closet endpoints
-@router.post("/closet/", response_model=Item)
+@router.post("/closet/add", response_model=Item)
 async def create_closet_item(
     item: ItemCreate,
     current_user: User = Depends(get_current_user),
@@ -166,7 +166,7 @@ async def create_closet_item(
             detail=str(e)
         )
 
-@router.get("/closet/", response_model=List[Item])
+@router.get("/closet/list", response_model=List[Item])
 async def get_closet_items(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)

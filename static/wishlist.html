@@ -43,7 +43,7 @@
             if (!token) return;
 
             try {
-                const response = await fetch('/api/wishlist/', {
+                const response = await fetch('/api/wishlist/list', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -138,7 +138,7 @@
 
             try {
                 // First, add to closet
-                const addToClosetResponse = await fetch('/api/closet/', {
+                const addToClosetResponse = await fetch('/api/closet/add', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
