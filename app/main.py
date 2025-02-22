@@ -15,6 +15,7 @@ from .models.database import User, Base
 from .database import get_db, engine
 from .apis.product_search import search_products
 from .apis.visual_search import search_by_image
+from .apis.imgbb_api import upload_image_to_imgbb
 from . import schemas
 from . import auth
 from .views import router as views_router
@@ -129,28 +130,25 @@ async def visual_search_url_endpoint(
 
 @app.post("/search/visual/")
 async def visual_search_file_endpoint(
-    request: Request,
     file: UploadFile = File(...),
     page: int = 1,
     per_page: int = 10,
     token: str = Depends(oauth2_scheme)
 ):
     try:
-        # Create a unique filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}_{file.filename}"
-        filepath = os.path.join(UPLOAD_DIR, filename)
+        # Read the file content
+        content = await file.read()
         
-        # Save the uploaded file
-        async with aiofiles.open(filepath, 'wb') as out_file:
-            content = await file.read()
-            await out_file.write(content)
+        # Upload to ImgBB
+        image_url = upload_image_to_imgbb(content, name=file.filename)
         
-        # Generate the public URL for the image
-        base_url = str(request.base_url)
-        image_url = f"{base_url}uploads/{filename}"
+        if not image_url:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to upload image"
+            )
         
-        # Pass the image URL to the search function
+        # Pass the ImgBB URL to the search function
         results = search_by_image(
             image_url,
             page=page,
