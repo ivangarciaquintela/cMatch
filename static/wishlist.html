@@ -106,15 +106,76 @@
                     <p class="text-gray-500 text-sm">${new Date(item.added_date).toLocaleDateString()}</p>
                 `;
 
+                // Create buttons container
+                const buttonsContainer = document.createElement('div');
+                buttonsContainer.className = 'flex gap-2';
+
+                // Move to Closet button
+                const moveToClosetButton = document.createElement('button');
+                moveToClosetButton.textContent = 'Move to Closet';
+                moveToClosetButton.className = 'bg-black text-white px-4 py-2 rounded hover:bg-gray-800';
+                moveToClosetButton.onclick = () => moveToCloset(item);
+
+                // Delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
                 deleteButton.className = 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600';
                 deleteButton.onclick = () => deleteItem(item.item_id);
 
+                buttonsContainer.appendChild(moveToClosetButton);
+                buttonsContainer.appendChild(deleteButton);
+
                 itemElement.appendChild(itemInfo);
-                itemElement.appendChild(deleteButton);
+                itemElement.appendChild(buttonsContainer);
                 container.appendChild(itemElement);
             });
+        }
+
+        // Add the moveToCloset function
+        async function moveToCloset(item) {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                // First, add to closet
+                const addToClosetResponse = await fetch('/api/closet/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        item_name: item.item_name,
+                        item_description: item.item_description,
+                        price: item.price
+                    })
+                });
+
+                if (!addToClosetResponse.ok) {
+                    const error = await addToClosetResponse.json();
+                    throw new Error(error.detail || 'Failed to add item to closet');
+                }
+
+                // Then, delete from wishlist
+                const deleteFromWishlistResponse = await fetch(`/api/wishlist/${item.item_id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!deleteFromWishlistResponse.ok) {
+                    const error = await deleteFromWishlistResponse.json();
+                    throw new Error(error.detail || 'Failed to remove item from wishlist');
+                }
+
+                // Reload the wishlist
+                loadWishlistItems();
+                alert('Item moved to closet successfully!');
+            } catch (error) {
+                console.error('Error moving item to closet:', error);
+                alert(error.message || 'Failed to move item to closet');
+            }
         }
 
         // Handle logout

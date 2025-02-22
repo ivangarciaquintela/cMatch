@@ -163,37 +163,12 @@ function displaySearchResults(results, authToken) {
         const contentContainer = document.createElement('div');
         contentContainer.className = 'p-4';
 
-        // Create preview container
-        const previewContainer = document.createElement('div');
-        previewContainer.className = 'preview-container mb-4';
-        previewContainer.innerHTML = '<div class="loading">Loading preview...</div>';
-
-        // Fetch preview image
-        fetch(`/preview/${encodeURIComponent(product.id)}?url=${encodeURIComponent(product.link)}`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.image) {
-                previewContainer.innerHTML = `
-                    <img src="${data.image}" alt="${product.name}" 
-                         class="w-full h-48 object-cover rounded">
-                `;
-            }
-        })
-        .catch(error => {
-            console.error('Preview error:', error);
-            previewContainer.innerHTML = '<div class="error">Preview unavailable</div>';
-        });
-
-        contentContainer.appendChild(previewContainer);
-
         // Product info
-        const itemNameLink = document.createElement('h3');
+        const itemNameLink = document.createElement('a');
+        itemNameLink.href = product.link;
+        itemNameLink.target = '_blank';
         itemNameLink.textContent = product.name;
-        itemNameLink.className = 'text-lg font-bold mb-2';
+        itemNameLink.className = 'text-lg font-bold mb-2 hover:underline block';
         contentContainer.appendChild(itemNameLink);
 
         if (product.description) {

@@ -34,6 +34,10 @@ async def search(request: Request):
 async def search(request: Request):
     return templates.TemplateResponse("visual.html", {"request": request}) 
 
+@router.get("/agent", response_class=HTMLResponse)
+async def search(request: Request):
+    return templates.TemplateResponse("agent.html", {"request": request}) 
+
 @router.get("/stylia", response_class=HTMLResponse)
 async def search(request: Request):
     return templates.TemplateResponse("agent.html", {"request": request}) 
