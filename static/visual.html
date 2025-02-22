@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cMatch - Search</title>
+    <title>cMatch - Visual Search</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos para el área de previsualización */
+        /* (Same styles as before - I've omitted them for brevity, but keep them!) */
         .preview-image {
             max-width: 150px;
             max-height: 150px;
@@ -16,82 +16,94 @@
         .hidden {
             display: none;
         }
-
-        /* Estilos para el toggle cuadrado */
        .toggle-container {
-            width: 120px; /* Ancho del toggle */
-            height: 40px; /* Alto del toggle */
+            width: 120px;
+            height: 40px;
             position: relative;
-            display: inline-block; /* Para que ocupe solo el espacio necesario */
+            display: inline-block;
         }
-
         .toggle-input {
-            display: none; /* Oculta el checkbox real */
+            display: none;
         }
-
         .toggle-label {
             display: flex;
-            justify-content: space-between; /* Distribuye el espacio uniformemente */
-            align-items: center; /* Centra verticalmente */
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
             height: 100%;
-            background-color: #0000; /* Color de fondo (desactivado) */
-            border-radius: 4px; /* Bordes ligeramente redondeados */
+            background-color: #eee;
+            border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
-            overflow: hidden; /* Importante para que el texto no se salga */
+            overflow: hidden;
             border: 1px solid #999;
         }
-
         .toggle-text {
-            width: 50%; /* Cada texto ocupa la mitad */
+            width: 50%;
             text-align: center;
-            color: #333;  /* Color del texto (desactivado) */
-            transition: color 0.3s, transform 0.3s;  /* Transiciones suaves del color y posición*/
-            position: relative; /* Necesario para el z-index */
-            z-index: 2; /* Asegura que el texto esté sobre el fondo */
-            font-size: 0.9em; /* Ajusta según necesidad */
-            user-select: none; /*Evita la seleccion de texto en toggle*/
-
+            color: #333;
+            transition: color 0.3s, transform 0.3s;
+            position: relative;
+            z-index: 2;
+            font-size: 0.9em;
+            user-select: none;
         }
-
-         .toggle-background { /* Nuevo elemento para el fondo deslizante */
+         .toggle-background {
             position: absolute;
             top: 0;
             left: 0;
-            width: 50%; /* Inicialmente, cubre la mitad izquierda */
+            width: 50%;
             height: 100%;
-            background-color: #0000; /* Color de fondo (activado - verde) */
-            border-radius: 3px; /* Bordes ligeramente redondeados */
-            transition: transform 0.3s; /* Transición suave */
-             /* Detrás del texto */
+            background-color: #000;
+            color :white;
+            border-radius: 3px;
+            transition: transform 0.3s;
+            
         }
-
-        /* Estilos cuando el toggle está activado */
         .toggle-input:checked + .toggle-label {
-            background-color: #0000; 
+            background-color: #eee;
         }
-
         .toggle-input:checked + .toggle-label .toggle-background {
-            transform: translateX(100%); /* Mueve el fondo a la derecha */
+            transform: translateX(100%);
         }
         .toggle-input:checked + .toggle-label .url-text{
-            color: #000;
-            
+            color: #333;
         }
-
         .toggle-input:checked + .toggle-label .photo-text {
-            color: #0000; /* Texto negro cuando está desactivado (URL seleccionada) */
-            
+            color: #fff;
         }
-        /* URL seleccionado*/
         .toggle-input + .toggle-label .url-text{
-            color: #0000;
-            
+            color: #fff;
         }
-        /* Photo texto seleccionado debe ser blanco*/
         .toggle-input + .toggle-label .photo-text {
-            color: #000; /* Texto blanco cuando está activo*/
+            color: #333;
+        }
+        #urlInputArea input[type="text"]{
+            border: 1px solid #ccc;
+            border-radius: 4px;
+         }
+          #urlInputArea .search-button,
+          #imagePreview .search-button{
+            background-color: #000;
+            color: #fff;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        #urlInputArea .search-button:hover,
+        #imagePreview .search-button:hover {
+             background-color: #000;
+             color:#fff;
+        }
+        /* Style for the container around the preview images and button */
+        #imagePreviewContainer {
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
+            align-items: flex-start; /* Align items to the start (left) */
+            gap: 10px; /* Add some space between preview images and the button */
+        }
+        #imagePreview {
+           display: flex; /* keeps the preview image in a row.*/
+           flex-wrap: wrap;/* allows multiple images in a row */
         }
 
 
@@ -100,7 +112,7 @@
 </head>
 <body class="bg-white">
     <div class="container mx-auto p-5">
-        <!-- Navbar (sin cambios) -->
+        <!-- Navbar (no changes) -->
         <nav class="nav-bar flex items-center justify-between mb-8">
             <div class="logo text-2xl font-bold text-gray-800">cMatch</div>
             <div class="nav-links flex space-x-16">
@@ -116,19 +128,18 @@
         <div class="mt-8">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Visual Search</h2>
 
-            <!-- Toggle Switch (Cuadrado) -->
+            <!-- Toggle Switch -->
            <div class="toggle-container">
                 <input type="checkbox" id="searchTypeToggle" class="toggle-input">
                 <label for="searchTypeToggle" class="toggle-label">
-                    <span class="toggle-text url-text">URL</span>
+                    <span class="toggle-text url-text">PHOTO</span>
                     <span class="toggle-background"></span>
-                    <span class="toggle-text photo-text">PHOTO</span>
+                    <span class="toggle-text photo-text">URL</span>
                 </label>
             </div>
 
-
-            <div class="bg-white p-4 rounded-lg shadow mt-4">  <!-- Agregué un margen superior aquí -->
-                <!-- Drag-and-Drop Area (inicialmente visible) -->
+            <div class="bg-white p-2 rounded-lg shadow mt-4">
+                <!-- Drag-and-Drop Area -->
                 <div id="dragAndDropArea" class="mb-4">
                     <div class="flex items-center justify-center w-full">
                         <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
@@ -142,13 +153,17 @@
                             <input id="dropzone-file" type="file" class="hidden" accept="image/*" />
                         </label>
                     </div>
-                    <div id="imagePreview" class="mt-2 flex flex-wrap"></div>
+                    <!-- Container for preview images and search button -->
+                    <div id="imagePreviewContainer">
+                         <div id="imagePreview" class="mt-2 flex flex-wrap"></div>
+                         <!-- Search button will be added here dynamically -->
+                    </div>
                 </div>
 
-              <!-- URL Input (inicialmente oculto) -->
+              <!-- URL Input -->
                 <div id="urlInputArea" class="hidden">
-                    <input type="text" id="imageUrl" placeholder="Enter image URL..." class="w-full px-4 py-2 border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="handleVisualSearch('url')" class="search-button w-full px-4 py-2 bg-black text-white rounded hover:bg-black transition duration-200">Search by Image URL</button>
+                    <input type="text" id="imageUrl" placeholder="Enter image URL..." class="w-full px-4 py-2 border rounded mb-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="handleVisualSearch('url')" class="search-button text-black w-full px-4 py-2 rounded hover:bg-black hover:text-white transition duration-200">Search by Image URL</button>
                 </div>
             </div>
         </div>
@@ -159,7 +174,6 @@
         </div>
     </div>
 
-    <script src="/static/js/search.js"></script>
     <script>
     // --- Toggle Functionality ---
     document.getElementById('searchTypeToggle').addEventListener('change', (event) => {
@@ -167,41 +181,98 @@
         const urlInputArea = document.getElementById('urlInputArea');
 
         if (event.target.checked) {
-            // Mostrar URL input, ocultar drag-and-drop
             dragAndDropArea.classList.add('hidden');
             urlInputArea.classList.remove('hidden');
+             clearImagePreview(); // Clear preview when switching to URL mode
         } else {
-            // Mostrar drag-and-drop, ocultar URL input
             dragAndDropArea.classList.remove('hidden');
             urlInputArea.classList.add('hidden');
         }
     });
-    // --- Drag and drop y previsualizacion imagen ---
-    function handleFileSelect(files) {
-            const imagePreview = document.getElementById('imagePreview');
-            imagePreview.innerHTML = ''; // Clear previous previews
 
-            for (const file of files) {
-                if (!file.type.startsWith('image/')) {
-                    alert('Please select an image file.'); // Basic file type validation
-                    continue;
-                }
+    // --- Drag and drop, image preview, and search button ---
+       function handleFileSelect(files) {
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        imagePreview.innerHTML = ''; // Clear previous previews
+        let hasImages = false; // Flag to track if any valid images were processed
 
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.className = 'preview-image'; // Add class for styling
-                    imagePreview.appendChild(img);
-                };
-                reader.readAsDataURL(file);
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file.');
+                continue;
             }
+            hasImages = true; // Set the flag to true if at least one valid image is found
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-image';
+                imagePreview.appendChild(img);
+
+
+            };
+            reader.readAsDataURL(file);
         }
 
-        // Event listener for the hidden file input
-        document.getElementById('dropzone-file').addEventListener('change', (event) => {
-            handleFileSelect(event.target.files);
-        });
+         // Only add the button if valid images were added
+         if (hasImages){
+            addSearchButton();
+         } else {
+            removeSearchButton();
+         }
+    }
+
+    function addSearchButton() {
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        // Check if the button already exists
+        if (!document.getElementById('searchByImageButton')) {
+            const button = document.createElement('button');
+            button.id = 'searchByImageButton';
+            button.textContent = 'Search by Image';
+            button.className = 'search-button text-black w-full px-4 py-2  rounded hover:bg-black hover:text-white transition duration-200';  // Tailwind classes
+            button.onclick = () => handleVisualSearch('image'); // Call your search handler
+            imagePreviewContainer.appendChild(button);
+        }
+    }
+
+    function removeSearchButton(){
+      const button = document.getElementById('searchByImageButton');
+        if(button){
+          button.remove();
+        }
+    }
+     function clearImagePreview() {
+        const imagePreview = document.getElementById('imagePreview');
+        imagePreview.innerHTML = ''; // Clear the preview
+        removeSearchButton();      // Remove the search button
+    }
+
+    // Event listeners
+    document.getElementById('dropzone-file').addEventListener('change', (event) => {
+        handleFileSelect(event.target.files);
+    });
+
+    const dropArea = document.getElementById('dragAndDropArea');
+    dropArea.addEventListener('dragover', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      dropArea.classList.add('bg-gray-200');
+    });
+    dropArea.addEventListener('dragleave', (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        dropArea.classList.remove('bg-gray-200');
+    });
+    dropArea.addEventListener('drop', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      dropArea.classList.remove('bg-gray-200');
+      const files = event.dataTransfer.files;
+      handleFileSelect(files);
+    });
     </script>
+        <script src="/static/js/search.js"></script>
 </body>
 </html>
