@@ -19,6 +19,7 @@ from .apis.imgbb_api import upload_image_to_imgbb
 from . import schemas
 from . import auth
 from .views import router as views_router
+from .apis.user_items import router as user_items_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -172,6 +173,9 @@ async def visual_search_file_endpoint(
 
 # Add this line after creating the FastAPI app but before other routes
 app.include_router(views_router)
+
+# Add this line after your other app.include_router() calls
+app.include_router(user_items_router, prefix="/api", tags=["user items"])
 
 # Remove or comment out the existing root route
 # @app.get("/")
