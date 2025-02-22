@@ -153,123 +153,88 @@ function displaySearchResults(results, authToken) {
         return;
     }
 
-    // Create a scrollable container for the list
     const scrollableContainer = document.createElement('div');
-    scrollableContainer.className = 'overflow-y-auto max-h-[60vh]'; // Key change: Enable vertical scrolling
+    scrollableContainer.className = 'overflow-y-auto max-h-[60vh]';
 
     results.forEach(product => {
         const productCard = document.createElement('div');
-        productCard.className = 'bg-white shadow overflow-hidden mb-4 product-card'; // mb-4 for spacing
+        productCard.className = 'bg-white shadow overflow-hidden mb-4 product-card';
 
         const contentContainer = document.createElement('div');
-        contentContainer.className = 'p-4'; // Add padding to the content
+        contentContainer.className = 'p-4';
 
-        // Create a link for the item name only
-        const itemNameLink = document.createElement('a');
-        itemNameLink.href = product.link; // Link to the product
-        itemNameLink.textContent = product.name; // Display the product name
-        itemNameLink.className = 'text-lg font-bold text-blue-600 hover:underline'; // Styling for the link
+        // Create preview container
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'preview-container mb-4';
+        previewContainer.innerHTML = '<div class="loading">Loading preview...</div>';
 
-        // Append the item name link to the content container
+        // Fetch preview image
+        fetch(`/preview/${encodeURIComponent(product.id)}?url=${encodeURIComponent(product.link)}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.image) {
+                previewContainer.innerHTML = `
+                    <img src="${data.image}" alt="${product.name}" 
+                         class="w-full h-48 object-cover rounded">
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Preview error:', error);
+            previewContainer.innerHTML = '<div class="error">Preview unavailable</div>';
+        });
+
+        contentContainer.appendChild(previewContainer);
+
+        // Product info
+        const itemNameLink = document.createElement('h3');
+        itemNameLink.textContent = product.name;
+        itemNameLink.className = 'text-lg font-bold mb-2';
         contentContainer.appendChild(itemNameLink);
 
-        // Add item description if available
         if (product.description) {
             const itemDescription = document.createElement('p');
             itemDescription.textContent = product.description;
+            itemDescription.className = 'text-gray-600 mb-2';
             contentContainer.appendChild(itemDescription);
         }
 
-        // Add item price if available
-        if (product.price && product.price.value && product.price.value.current) {
+        if (product.price?.value?.current) {
             const itemPrice = document.createElement('p');
             itemPrice.textContent = `$${product.price.value.current}`;
+            itemPrice.className = 'text-gray-800 font-semibold';
             contentContainer.appendChild(itemPrice);
         }
+
+        // Add buttons container
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'flex gap-2 mt-4';
 
         // Wishlist button
         const wishlistButton = document.createElement('button');
         wishlistButton.textContent = 'Add to Wishlist';
-        wishlistButton.className = 'mt-2 px-4 py-2 bg-white border border-black text-black hover:bg-black hover:text-white transition duration-200';
-
-        wishlistButton.onclick = async (event) => {
-            event.stopPropagation();
-            console.log('Wishlist button clicked');
-            
-            const itemData = {
-                item_name: product.name,
-                item_description: product.description || '',
-                price: product.price?.value?.current || null
-            };
-            
-            console.log('Sending item data:', itemData); // Debug log
-            
-            try {
-                const response = await fetch('/api/wishlist/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(itemData)
-                });
-                
-                console.log('Response status:', response.status); // Debug log
-                
-                const responseData = await response.json();
-                console.log('Response data:', responseData); // Debug log
-                
-                if (response.ok) {
-                    alert('Item added to wishlist!');
-                } else {
-                    alert(`Failed to add to wishlist: ${responseData.detail || 'Unknown error'}`);
-                }
-            } catch (error) {
-                console.error('Error adding to wishlist:', error);
-                alert('An error occurred while adding to wishlist.');
-            }
-        };
-        contentContainer.appendChild(wishlistButton);
+        wishlistButton.className = 'flex-1 px-4 py-2 bg-white border border-black text-black hover:bg-black hover:text-white transition duration-200';
+        wishlistButton.onclick = () => handleWishlistAdd(product, authToken);
 
         // Closet button
         const closetButton = document.createElement('button');
         closetButton.textContent = 'Add to Closet';
-        closetButton.className = 'mt-2 px-4 py-2 bg-white border border-black text-black hover:bg-black hover:text-white transition duration-200';
+        closetButton.className = 'flex-1 px-4 py-2 bg-white border border-black text-black hover:bg-black hover:text-white transition duration-200';
+        closetButton.onclick = () => handleClosetAdd(product, authToken);
 
-        closetButton.onclick = async (event) => {
-            event.stopPropagation(); // Prevent the click from bubbling up
-            console.log('Closet button clicked'); // Debug log
-            try {
-                const response = await fetch('/api/closet/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({
-                        item_name: product.name,
-                        item_description: product.description || '',
-                        price: product.price?.value?.current || null
-                    })
-                });
-                if (response.ok) {
-                    alert('Item added to closet!');
-                } else {
-                    const errorData = await response.json();
-                    alert(`Failed to add to closet: ${errorData.detail}`);
-                }
-            } catch (error) {
-                console.error('Error adding to closet:', error);
-                alert('An error occurred while adding to closet.');
-            }
-        };
-        contentContainer.appendChild(closetButton);
+        buttonsContainer.appendChild(wishlistButton);
+        buttonsContainer.appendChild(closetButton);
+        contentContainer.appendChild(buttonsContainer);
 
         productCard.appendChild(contentContainer);
-        scrollableContainer.appendChild(productCard); // Add to scrollable container
+        scrollableContainer.appendChild(productCard);
     });
 
-    resultsContainer.appendChild(scrollableContainer); // Add scrollable container to results
+    resultsContainer.appendChild(scrollableContainer);
 }
 
 // Handle Logout

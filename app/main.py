@@ -23,6 +23,7 @@ from . import auth
 from .views import router as views_router
 from .apis.user_items import router as user_items_router
 from .apis.user_profile import router as user_profile_router
+from .services.screenshot import capture_screenshot
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -247,3 +248,17 @@ async def clothing_recommendations_endpoint(
 # @app.get("/")
 # async def root():
 #     return RedirectResponse(url="/static/login.html") 
+
+@app.get("/preview/{item_id}")
+async def get_preview(
+    item_id: str,
+    url: str,
+    token: str = Depends(oauth2_scheme)
+):
+    try:
+        screenshot_base64 = await capture_screenshot(url)
+        if screenshot_base64:
+            return {"image": f"data:image/jpeg;base64,{screenshot_base64}"}
+        raise HTTPException(status_code=500, detail="Failed to generate preview")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 
