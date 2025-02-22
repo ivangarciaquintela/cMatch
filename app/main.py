@@ -22,6 +22,7 @@ from . import schemas
 from . import auth
 from .views import router as views_router
 from .apis.user_items import router as user_items_router
+from .apis.user_profile import router as user_profile_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -189,6 +190,7 @@ app.include_router(views_router)
 
 # Add this line after your other app.include_router() calls
 app.include_router(user_items_router, prefix="/api", tags=["user items"])
+app.include_router(user_profile_router, prefix="/api/user", tags=["user profile"])
 
 # Add this endpoint after your other endpoints
 @app.get("/agent/clothing-recommendations/")

@@ -26,7 +26,6 @@ async def register(request: Request):
 async def search(request: Request):
     return templates.TemplateResponse("search.html", {"request": request}) 
 
-
 @router.get("/product", response_class=HTMLResponse)
 async def search(request: Request):
     return templates.TemplateResponse("product.html", {"request": request}) 
@@ -35,9 +34,17 @@ async def search(request: Request):
 async def search(request: Request):
     return templates.TemplateResponse("visual.html", {"request": request}) 
 
-@router.get("/agent", response_class=HTMLResponse)
+@router.get("/stylia", response_class=HTMLResponse)
 async def search(request: Request):
     return templates.TemplateResponse("agent.html", {"request": request}) 
+
+@router.get("/wishlist", response_class=HTMLResponse)
+async def search(request: Request):
+    return templates.TemplateResponse("wishlist.html", {"request": request}) 
+
+@router.get("/user", response_class=HTMLResponse)
+async def search(request: Request):
+    return templates.TemplateResponse("profile.html", {"request": request}) 
 
 @router.get("/closet", response_class=HTMLResponse)
 async def search(request: Request):

@@ -34,7 +34,7 @@ async function handleSearch() {
 
         if (response.ok) {
             const results = await response.json();
-            displaySearchResults(results);
+            displaySearchResults(results, token);
         } else if (response.status === 401) {
             localStorage.removeItem('authToken');
             window.location.href = '/login';
@@ -109,7 +109,7 @@ async function handleVisualSearch(method) {
 
         if (response.ok) {
             const results = await response.json();
-            displaySearchResults(results);
+            displaySearchResults(results, token);
         } else if (response.status === 401) {
             localStorage.removeItem('authToken');
             window.location.href = '/login';
@@ -127,13 +127,11 @@ async function handleVisualSearch(method) {
     }
 }
 
-function displaySearchResults(results) {
+function displaySearchResults(results, authToken) {
     const resultsContainer = document.getElementById('searchResults');
-    resultsContainer.innerHTML = '';  // Clear previous results
-
+    resultsContainer.innerHTML = '';
     const resultsHeader = document.createElement('h2');
     resultsHeader.textContent = 'Results:';
-    resultsHeader.className = "text-2xl font-semibold mb-4"; // Tailwind classes
     resultsContainer.appendChild(resultsHeader);
 
     if (!results || results.length === 0) {
@@ -152,61 +150,116 @@ function displaySearchResults(results) {
         const productCard = document.createElement('div');
         productCard.className = 'bg-white shadow overflow-hidden mb-4 product-card'; // mb-4 for spacing
 
-        const productLink = document.createElement('a');
-        productLink.href = product.link;
-        productLink.className = 'block no-underline text-current hover:text-current';
-
-        if (product.image) {
-            const imageContainer = document.createElement('div');
-            imageContainer.className = 'relative h-48 overflow-hidden'; // or any desired height
-            const productImage = document.createElement('img');
-            productImage.src = product.image;
-            productImage.alt = product.name || 'Product Image';
-            productImage.className = 'absolute inset-0 w-full h-full object-cover';
-            imageContainer.appendChild(productImage);
-            productLink.appendChild(imageContainer);
-        }
-
         const contentContainer = document.createElement('div');
-        contentContainer.className = 'p-4';
+        contentContainer.className = 'p-4'; // Add padding to the content
 
-        const productName = document.createElement('h3');
-        productName.textContent = product.name || 'No Name';
-        productName.className = 'text-lg font-semibold text-gray-800';
-        contentContainer.appendChild(productName);
+        // Create a link for the item name only
+        const itemNameLink = document.createElement('a');
+        itemNameLink.href = product.link; // Link to the product
+        itemNameLink.textContent = product.name; // Display the product name
+        itemNameLink.className = 'text-lg font-bold text-blue-600 hover:underline'; // Styling for the link
 
-        const productBrand = document.createElement('p');
-        productBrand.textContent = product.brand ? product.brand.toUpperCase() : 'N/A';
-        productBrand.className = 'text-sm font-bold text-gray-700';
-        contentContainer.appendChild(productBrand);
+        // Append the item name link to the content container
+        contentContainer.appendChild(itemNameLink);
 
-        const productPrice = document.createElement('p');
-        productPrice.className = "text-base text-gray-900";
-        if (product.price?.value?.current !== undefined && product.price?.currency) {
-            productPrice.textContent = `Price: ${product.price.value.current} ${product.price.currency}`;
-        } else {
-            productPrice.textContent = 'Price: N/A';
+        // Add item description if available
+        if (product.description) {
+            const itemDescription = document.createElement('p');
+            itemDescription.textContent = product.description;
+            contentContainer.appendChild(itemDescription);
         }
-        contentContainer.appendChild(productPrice);
 
+        // Add item price if available
+        if (product.price && product.price.value && product.price.value.current) {
+            const itemPrice = document.createElement('p');
+            itemPrice.textContent = `$${product.price.value.current}`;
+            contentContainer.appendChild(itemPrice);
+        }
+
+        // Wishlist button
         const wishlistButton = document.createElement('button');
         wishlistButton.textContent = 'Add to Wishlist';
-        wishlistButton.className = 'mt-2 px-4 py-2 bg-white border border-black text-black  hover:bg-black hover:text-white transition duration-200';
+        wishlistButton.className = 'mt-2 px-4 py-2 bg-white border border-black text-black hover:bg-black hover:text-white transition duration-200';
 
-        wishlistButton.onclick = () => {
-            addToWishlist(product.id);
+        wishlistButton.onclick = async (event) => {
+            event.stopPropagation();
+            console.log('Wishlist button clicked');
+            
+            const itemData = {
+                item_name: product.name,
+                item_description: product.description || '',
+                price: product.price?.value?.current || null
+            };
+            
+            console.log('Sending item data:', itemData); // Debug log
+            
+            try {
+                const response = await fetch('/api/wishlist/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(itemData)
+                });
+                
+                console.log('Response status:', response.status); // Debug log
+                
+                const responseData = await response.json();
+                console.log('Response data:', responseData); // Debug log
+                
+                if (response.ok) {
+                    alert('Item added to wishlist!');
+                } else {
+                    alert(`Failed to add to wishlist: ${responseData.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error adding to wishlist:', error);
+                alert('An error occurred while adding to wishlist.');
+            }
         };
         contentContainer.appendChild(wishlistButton);
 
-        productLink.appendChild(contentContainer);
-        productCard.appendChild(productLink);
+        // Closet button
+        const closetButton = document.createElement('button');
+        closetButton.textContent = 'Add to Closet';
+        closetButton.className = 'mt-2 px-4 py-2 bg-white border border-black text-black hover:bg-black hover:text-white transition duration-200';
+
+        closetButton.onclick = async (event) => {
+            event.stopPropagation(); // Prevent the click from bubbling up
+            console.log('Closet button clicked'); // Debug log
+            try {
+                const response = await fetch('/api/closet/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        item_name: product.name,
+                        item_description: product.description || '',
+                        price: product.price?.value?.current || null
+                    })
+                });
+                if (response.ok) {
+                    alert('Item added to closet!');
+                } else {
+                    const errorData = await response.json();
+                    alert(`Failed to add to closet: ${errorData.detail}`);
+                }
+            } catch (error) {
+                console.error('Error adding to closet:', error);
+                alert('An error occurred while adding to closet.');
+            }
+        };
+        contentContainer.appendChild(closetButton);
+
+        productCard.appendChild(contentContainer);
         scrollableContainer.appendChild(productCard); // Add to scrollable container
     });
 
     resultsContainer.appendChild(scrollableContainer); // Add scrollable container to results
 }
-
-
 
 // Handle Logout
 function handleLogout() {

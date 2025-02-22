@@ -9,6 +9,11 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
+    birth_date DATE,
+    style_preferences TEXT[],
+    favorite_brands TEXT[],
+    preferred_colors TEXT[],
+    usual_sizes JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP,
@@ -35,7 +40,6 @@ CREATE TABLE IF NOT EXISTS wishlist (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-
 -- Closet table
 CREATE TABLE IF NOT EXISTS closet (
     closet_id SERIAL PRIMARY KEY,
@@ -49,4 +53,5 @@ CREATE TABLE IF NOT EXISTS closet (
 
 -- Add indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_search_history_user ON search_history(user_id);
-CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id); 
+CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id);
+CREATE INDEX IF NOT EXISTS idx_closet_user ON closet(user_id); 

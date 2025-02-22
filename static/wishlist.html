@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cMatch - Closet</title>
+    <title>cMatch - Wishlist</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-white-100">
@@ -20,8 +20,8 @@
         </nav>
 
         <div class="mt-8">
-            <h2 class="text-2xl font-semibold mb-4">My Closet</h2>
-            <div id="closetItems" class="space-y-4">
+            <h2 class="text-2xl font-semibold mb-4">My Wishlist</h2>
+            <div id="wishlistItems" class="space-y-4">
                 <!-- Items will be populated here -->
             </div>
         </div>
@@ -38,12 +38,12 @@
             return token;
         }
 
-        async function loadClosetItems() {
+        async function loadWishlistItems() {
             const token = checkAuth();
             if (!token) return;
 
             try {
-                const response = await fetch('/api/closet/', {
+                const response = await fetch('/api/wishlist/', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -57,7 +57,7 @@
                     window.location.href = '/login';
                 }
             } catch (error) {
-                console.error('Error loading closet:', error);
+                console.error('Error loading wishlist:', error);
             }
         }
 
@@ -66,7 +66,7 @@
             if (!token) return;
 
             try {
-                const response = await fetch(`/api/closet/${itemId}`, {
+                const response = await fetch(`/api/wishlist/${itemId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -74,7 +74,7 @@
                 });
 
                 if (response.ok) {
-                    loadClosetItems(); // Reload the list
+                    loadWishlistItems(); // Reload the list
                 } else {
                     const error = await response.json();
                     alert(error.detail || 'Failed to delete item');
@@ -86,11 +86,11 @@
         }
 
         function displayItems(items) {
-            const container = document.getElementById('closetItems');
+            const container = document.getElementById('wishlistItems');
             container.innerHTML = '';
 
             if (!items || items.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No items in closet</p>';
+                container.innerHTML = '<p class="text-gray-500">No items in wishlist</p>';
                 return;
             }
 
@@ -125,7 +125,7 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
-            loadClosetItems();
+            loadWishlistItems();
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', handleLogout);

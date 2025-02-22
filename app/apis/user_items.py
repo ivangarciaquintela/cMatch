@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
+from sqlalchemy import text
 
 from ..database import get_db
 from ..models.database import User
@@ -54,24 +55,57 @@ async def create_wishlist_item(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    db_item = db.query("wishlist").insert().values(
-        user_id=current_user.user_id,
-        item_name=item.item_name,
-        item_description=item.item_description,
-        price=item.price
-    ).returning("*")
-    db.commit()
-    return db_item.first()
+    print(f"Received item data: {item}")  # Debug log
+    
+    stmt = text("""
+        INSERT INTO wishlist (user_id, item_name, item_description, price)
+        VALUES (:user_id, :item_name, :item_description, :price)
+        RETURNING wishlist_id as item_id, user_id, item_name, item_description, price, added_date
+    """)
+    
+    try:
+        result = db.execute(
+            stmt,
+            {
+                "user_id": current_user.user_id,
+                "item_name": item.item_name,
+                "item_description": item.item_description,
+                "price": item.price
+            }
+        )
+        db.commit()
+        item_data = dict(result.first())
+        print(f"Created item: {item_data}")  # Debug log
+        return item_data
+    except Exception as e:
+        print(f"Error creating wishlist item: {e}")  # Debug log
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 @router.get("/wishlist/", response_model=List[Item])
 async def get_wishlist_items(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    items = db.execute(
-        "SELECT * FROM wishlist WHERE user_id = :user_id ORDER BY added_date DESC",
-        {"user_id": current_user.user_id}
-    ).fetchall()
+    # Use text() for consistent SQL formatting and map wishlist_id to item_id
+    stmt = text("""
+        SELECT 
+            wishlist_id as item_id,
+            user_id,
+            item_name,
+            item_description,
+            price,
+            added_date
+        FROM wishlist 
+        WHERE user_id = :user_id 
+        ORDER BY added_date DESC
+    """)
+    
+    result = db.execute(stmt, {"user_id": current_user.user_id})
+    items = [dict(row) for row in result]
     return items
 
 @router.delete("/wishlist/{item_id}")
@@ -102,29 +136,57 @@ async def create_closet_item(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    db_item = db.execute(
-        """INSERT INTO closet (user_id, item_name, item_description, price)
+    print(f"Received item data: {item}")  # Debug log
+    
+    stmt = text("""
+        INSERT INTO closet (user_id, item_name, item_description, price)
         VALUES (:user_id, :item_name, :item_description, :price)
-        RETURNING *""",
-        {
-            "user_id": current_user.user_id,
-            "item_name": item.item_name,
-            "item_description": item.item_description,
-            "price": item.price
-        }
-    )
-    db.commit()
-    return db_item.first()
+        RETURNING closet_id as item_id, user_id, item_name, item_description, price, added_date
+    """)
+    
+    try:
+        result = db.execute(
+            stmt,
+            {
+                "user_id": current_user.user_id,
+                "item_name": item.item_name,
+                "item_description": item.item_description,
+                "price": item.price
+            }
+        )
+        db.commit()
+        item_data = dict(result.first())
+        print(f"Created item: {item_data}")  # Debug log
+        return item_data
+    except Exception as e:
+        print(f"Error creating closet item: {e}")  # Debug log
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 @router.get("/closet/", response_model=List[Item])
 async def get_closet_items(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    items = db.execute(
-        "SELECT * FROM closet WHERE user_id = :user_id ORDER BY added_date DESC",
-        {"user_id": current_user.user_id}
-    ).fetchall()
+    # Use text() for consistent SQL formatting and map closet_id to item_id
+    stmt = text("""
+        SELECT 
+            closet_id as item_id,
+            user_id,
+            item_name,
+            item_description,
+            price,
+            added_date
+        FROM closet 
+        WHERE user_id = :user_id 
+        ORDER BY added_date DESC
+    """)
+    
+    result = db.execute(stmt, {"user_id": current_user.user_id})
+    items = [dict(row) for row in result]
     return items
 
 @router.delete("/closet/{item_id}")
