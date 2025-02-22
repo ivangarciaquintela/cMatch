@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cMatch - Search</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-bar">
+            <div class="logo">cMatch</div>
+            <div class="nav-links">
+                <button id="logoutBtn" class="nav-btn">LOG OUT</button>
+            </div>
+        </nav>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2>Product Search</h2>
+            <div class="search-container">
+                <input type="text" id="searchQuery" placeholder="Search for products...">
+                <input type="text" id="searchBrand" placeholder="Brand (optional)">
+                <button onclick="handleSearch()">Search</button>
+            </div>
+        </div>
+
+        <!-- Visual Search Section -->
+        <div class="visual-search-section">
+            <h2>Visual Search</h2>
+            <div class="visual-search-container">
+                <input type="file" id="imageUpload" accept="image/*">
+                <button onclick="handleVisualSearch()">Search by Image</button>
+                <div id="imagePreview" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="searchResults" class="search-results">
+            <!-- Search results will be dynamically added here -->
+        </div>
+    </div>
+    <script src="/static/js/search.js"></script>
+</body>
+</html> 

@@ -5,6 +5,7 @@ from typing import List
 import os
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 # Use relative imports since we're inside the app package
 from .models.database import User, Base
@@ -13,6 +14,7 @@ from .apis.product_search import search_products
 from .apis.visual_search import search_by_image
 from . import schemas
 from . import auth
+from .views import router as views_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -93,4 +95,12 @@ async def visual_search_endpoint(
         page=search.page,
         per_page=search.per_page
     )
-    return results 
+    return results
+
+# Add this line after creating the FastAPI app but before other routes
+app.include_router(views_router)
+
+# Remove or comment out the existing root route
+# @app.get("/")
+# async def root():
+#     return RedirectResponse(url="/static/login.html") 

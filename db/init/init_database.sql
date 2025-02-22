@@ -35,6 +35,18 @@ CREATE TABLE IF NOT EXISTS wishlist (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+
+-- Closet table
+CREATE TABLE IF NOT EXISTS closet (
+    closet_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    item_name VARCHAR(100) NOT NULL,
+    item_description TEXT,
+    price DECIMAL(10,2),
+    added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
 -- Add indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_search_history_user ON search_history(user_id);
 CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id); 
