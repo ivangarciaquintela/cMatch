@@ -53,21 +53,30 @@ async def update_user_profile(
 ):
     """Update the current user's profile"""
     try:
-        # Only include non-None values in the update
+        # Get the update data, excluding None values
         update_data = profile_update.dict(exclude_unset=True, exclude_none=True)
         
-        # Convert the UserSizes model to JSON string if it exists
-        if 'usual_sizes' in update_data and update_data['usual_sizes']:
-            update_data['usual_sizes'] = json.dumps(update_data['usual_sizes'].dict(exclude_none=True))
+        # Convert usual_sizes dict to JSON string if present
+        if 'usual_sizes' in update_data:
+            # Check if usual_sizes is already a string
+            if isinstance(update_data['usual_sizes'], dict):
+                update_data['usual_sizes'] = json.dumps(update_data['usual_sizes'])
+            elif update_data['usual_sizes'] is None:
+                update_data['usual_sizes'] = '{}'
+        
+        # Handle array fields
+        array_fields = ['style_preferences', 'favorite_brands', 'preferred_colors']
+        for field in array_fields:
+            if field in update_data and update_data[field] is None:
+                update_data[field] = []
         
         # Build the SET clause dynamically based on provided fields
         set_clauses = []
         params = {"user_id": current_user.user_id}
         
         for key, value in update_data.items():
-            if value is not None:  # Only include non-None values
-                set_clauses.append(f"{key} = :{key}")
-                params[key] = value
+            set_clauses.append(f"{key} = :{key}")
+            params[key] = value
         
         # Add updated_at to the SET clause
         set_clauses.append("updated_at = CURRENT_TIMESTAMP")
@@ -96,14 +105,22 @@ async def update_user_profile(
         
         updated_profile = dict(result.first())
         
-        # Ensure usual_sizes is a dict
+        # Convert usual_sizes JSON string back to dict
         if updated_profile['usual_sizes'] is None:
             updated_profile['usual_sizes'] = {}
-            
+        else:
+            try:
+                # Handle both string and already-parsed JSON
+                if isinstance(updated_profile['usual_sizes'], str):
+                    updated_profile['usual_sizes'] = json.loads(updated_profile['usual_sizes'])
+            except json.JSONDecodeError:
+                updated_profile['usual_sizes'] = {}
+        
         return updated_profile
         
     except Exception as e:
         db.rollback()
+        print(f"Error updating profile: {str(e)}")  # Add logging for debugging
         raise HTTPException(
             status_code=500,
             detail=f"Failed to update profile: {str(e)}"

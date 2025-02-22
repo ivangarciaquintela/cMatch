@@ -17,7 +17,7 @@ from .models.database import User, Base
 from .database import get_db, engine
 from .apis.product_search import search_products
 from .apis.visual_search import search_by_image
-from .apis.imgbb_api import upload_image_to_imgbb
+from .apis.imgbb_api import upload_image_to_freeimage
 from . import schemas
 from . import auth
 from .views import router as views_router
@@ -127,13 +127,12 @@ async def visual_search_url_endpoint(
             page=page,
             per_page=per_page
         )
-        
         if results is None:
             raise HTTPException(
                 status_code=500,
                 detail="Failed to perform visual search"
             )
-            
+        print("urlimg")
         return results
         
     except Exception as e:
@@ -151,25 +150,31 @@ async def visual_search_file_endpoint(
     token: str = Depends(oauth2_scheme)
 ):
     try:
+        # Log the incoming request details
+        print(f"Received file upload: {file.filename}, type: {file.content_type}, size: {file.spool_max_size} bytes")
+        
         # Read the file content
         content = await file.read()
-        print(content)
+        print(f"File content read successfully, size: {len(content)} bytes")
+        
         # Upload to ImgBB
-        image_url = upload_image_to_imgbb(content, name=file.filename)
+        image_url = upload_image_to_freeimage(content, name=file.filename)
+        print(f"Image uploaded to ImgBB, URL: {image_url}")
         
         if not image_url:
             raise HTTPException(
                 status_code=500,
                 detail="Failed to upload image"
             )
-        print(image_url)
+        
         # Pass the ImgBB URL to the search function
         results = search_by_image(
             image_url,
             page=page,
             per_page=per_page
         )
-        print(results)
+        print(f"Search results: {results}")
+        
         if results is None:
             raise HTTPException(
                 status_code=500,

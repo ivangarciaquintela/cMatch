@@ -50,23 +50,22 @@ async function handleSearch() {
 // Handle Visual Search
 async function handleVisualSearch(method) {
     const token = checkAuth();
-    console.log(method)
     if (!token) return;
 
     let searchButton;
     let formData = new FormData();
     let endpoint = '/search/visual/';
-    console.log(method)
     
-    if (method === 'file') {
-        const fileInput = document.getElementById('imageUpload');
-        const file = fileInput.files[0];
+    if (method === 'image') {
+        const fileInput = document.getElementById('dropzone-file');
         searchButton = fileInput.nextElementSibling;
 
-        if (!file) {
+        if (!fileInput || !fileInput.files[0]) {
             alert('Please select an image.');
             return;
         }
+
+        const file = fileInput.files[0];
 
         if (!file.type.startsWith('image/')) {
             alert('Please select a valid image file.');
@@ -82,31 +81,42 @@ async function handleVisualSearch(method) {
         reader.readAsDataURL(file);
 
         formData.append('file', file);
+        // Use POST method for file upload
+        const response = await fetch(endpoint, {
+            method: 'POST', // Ensure POST is used for file upload
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData // Send the form data containing the file
+        });
+        console.log(endpoint)
+        if (response.ok) {
+            const results = await response.json();
+            displaySearchResults(results, token);
+        } else if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login';
+        } else {
+            const errorData = await response.json();
+            alert(`Search failed: ${errorData.detail}`);
+        }
     } else {
         const urlInput = document.getElementById('imageUrl');
-        const imageUrl = urlInput.value.trim();
         searchButton = urlInput.nextElementSibling;
 
-        if (!imageUrl) {
+        if (!urlInput || !urlInput.value.trim()) {
             alert('Please enter an image URL.');
             return;
         }
 
-        endpoint += `?image_url=${encodeURIComponent(imageUrl)}`;
-    }
-
-    // Show loading state
-    const originalText = searchButton.textContent;
-    searchButton.disabled = true;
-    searchButton.textContent = 'Searching...';
-
-    try {
+        endpoint += `?image_url=${encodeURIComponent(urlInput.value.trim())}`;
+        
+        // Use GET method for URL input
         const response = await fetch(endpoint, {
-            method: method === 'file' ? 'POST' : 'GET',
+            method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
-            },
-            body: method === 'file' ? formData : undefined
+            }
         });
 
         if (response.ok) {
@@ -119,11 +129,10 @@ async function handleVisualSearch(method) {
             const errorData = await response.json();
             alert(`Search failed: ${errorData.detail}`);
         }
-    } catch (error) {
-        console.error('Visual search error:', error);
-        alert('An error occurred during visual search. Please try again.');
-    } finally {
-        // Reset button state
+    }
+
+    // Reset button state
+    if (searchButton) {
         searchButton.disabled = false;
         searchButton.textContent = originalText;
     }

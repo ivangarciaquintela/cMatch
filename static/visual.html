@@ -185,8 +185,7 @@
         if (event.target.checked) {
             dragAndDropArea.classList.add('hidden');
             urlInputArea.classList.remove('hidden');
-             clearImagePreview(); // Clear preview when switching to URL mode
-            searchByImageButton.classList.add('hidden'); // Hide button in URL mode.
+             clearImagePreview(); // Clear preview when s// Hide button in URL mode.
         } else {
             dragAndDropArea.classList.remove('hidden');
             urlInputArea.classList.add('hidden');
@@ -220,12 +219,6 @@
             reader.readAsDataURL(file);
         }
 
-         // Only add show the button button if valid images were added
-         if (hasImages){
-             searchByImageButton.classList.remove('hidden');
-         } else {
-             searchByImageButton.classList.add('hidden');
-         }
     }
 
     // No need for addSearchButton or removeSearchButton  functions anymore
@@ -234,7 +227,6 @@
         const imagePreview = document.getElementById('imagePreview');
          const searchByImageButton = document.getElementById('searchByImageButton');
         imagePreview.innerHTML = ''; // Clear the preview
-        searchByImageButton.classList.add('hidden');   // Hide the search button
     }
 
     // Event listeners

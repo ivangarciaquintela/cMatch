@@ -1,23 +1,24 @@
 import requests
-from config import IMGBB_API_KEY
 
-def upload_image_to_imgbb(image_data, name=None):
+def upload_image_to_freeimage(image_data, name=None):
     """
-    Upload an image to ImgBB and return the URL.
+    Upload an image to freeimage.host and return the URL.
     Args:
         image_data: Binary image data
         name: Optional filename
     Returns:
         URL of the uploaded image or None if upload fails
     """
-    url = "https://api.imgbb.com/1/upload"
+    url = "https://freeimage.host/api/1/upload"
     
     payload = {
-        'key': IMGBB_API_KEY,
+        'key': '6d207e02198a847aa98d0a2a901485a5',
+        'action': 'upload',
+        'format': 'json'
     }
     
     files = {
-        'image': ('image.jpg', image_data, 'image/jpeg')
+        'source': ('image.jpg', image_data, 'image/jpeg')
     }
     
     if name:
@@ -28,12 +29,12 @@ def upload_image_to_imgbb(image_data, name=None):
         response.raise_for_status()
         
         result = response.json()
-        if result['success']:
-            return result['data']['url']
+        if result['status_code'] == 200:
+            return result['image']['url']
         else:
-            print("ImgBB upload failed:", result)
+            print("Freeimage upload failed:", result)
             return None
             
     except Exception as e:
-        print(f"Error uploading to ImgBB: {e}")
+        print(f"Error uploading to Freeimage: {e}")
         return None 
