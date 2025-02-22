@@ -11,7 +11,7 @@ def search_products(query, brand, page=1, per_page=5):
     """
     api = InditexAPI()  # Create an instance of InditexAPI
     token = api.get_token()  # Get the token
-    print(token)
+    # print(token)
     if not token:
         print("Error: No se pudo obtener el token de autenticación.")
         return None

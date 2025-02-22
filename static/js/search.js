@@ -17,18 +17,19 @@ async function handleSearch() {
     const brand = document.getElementById('searchBrand').value;
 
     try {
-        const response = await fetch('/search/products/', {
-            method: 'POST',
+        // Build URL with query parameters
+        const params = new URLSearchParams({
+            query: query,
+            page: 1,
+            per_page: 10
+        });
+        if (brand) params.append('brand', brand);
+
+        const response = await fetch(`/search/products/?${params}`, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                query,
-                brand,
-                page: 1,
-                per_page: 10
-            })
+            }
         });
 
         if (response.ok) {
@@ -47,41 +48,63 @@ async function handleSearch() {
 }
 
 // Handle Visual Search
-async function handleVisualSearch() {
+async function handleVisualSearch(method) {
     const token = checkAuth();
     if (!token) return;
 
-    const fileInput = document.getElementById('imageUpload');
-    const file = fileInput.files[0];
+    let searchButton;
+    let formData = new FormData();
+    let endpoint = '/search/visual/';
+    
+    if (method === 'file') {
+        const fileInput = document.getElementById('imageUpload');
+        const file = fileInput.files[0];
+        searchButton = fileInput.nextElementSibling;
 
-    if (!file) {
-        alert('Please select an image.');
-        return;
+        if (!file) {
+            alert('Please select an image.');
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file.');
+            return;
+        }
+
+        // Display image preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px;">`;
+        }
+        reader.readAsDataURL(file);
+
+        formData.append('file', file);
+    } else {
+        const urlInput = document.getElementById('imageUrl');
+        const imageUrl = urlInput.value.trim();
+        searchButton = urlInput.nextElementSibling;
+
+        if (!imageUrl) {
+            alert('Please enter an image URL.');
+            return;
+        }
+
+        endpoint += `?image_url=${encodeURIComponent(imageUrl)}`;
     }
 
-    if (!file.type.startsWith('image/')) {
-        alert('Please select a valid image file.');
-        return;
-    }
-
-    // Display image preview
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const preview = document.getElementById('imagePreview');
-        preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px;">`;
-    }
-    reader.readAsDataURL(file);
-
-    const formData = new FormData();
-    formData.append('file', file);
+    // Show loading state
+    const originalText = searchButton.textContent;
+    searchButton.disabled = true;
+    searchButton.textContent = 'Searching...';
 
     try {
-        const response = await fetch('/search/visual/', {
-            method: 'POST',
+        const response = await fetch(endpoint, {
+            method: method === 'file' ? 'POST' : 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
             },
-            body: formData
+            body: method === 'file' ? formData : undefined
         });
 
         if (response.ok) {
@@ -96,7 +119,11 @@ async function handleVisualSearch() {
         }
     } catch (error) {
         console.error('Visual search error:', error);
-        alert('An error occurred during visual search.');
+        alert('An error occurred during visual search. Please try again.');
+    } finally {
+        // Reset button state
+        searchButton.disabled = false;
+        searchButton.textContent = originalText;
     }
 }
 

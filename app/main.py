@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Request, Query
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
@@ -6,6 +6,9 @@ import os
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+import base64
+import aiofiles
+from datetime import datetime
 
 # Use relative imports since we're inside the app package
 from .models.database import User, Base
@@ -32,6 +35,13 @@ app.add_middleware(
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Create uploads directory if it doesn't exist
+UPLOAD_DIR = "static/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Mount the uploads directory
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -72,30 +82,95 @@ def login_for_access_token(
     return {"access_token": access_token, "token_type": "bearer"}
 
 # Product search endpoints
-@app.post("/search/products/")
+@app.get("/search/products/")
 async def search_products_endpoint(
-    search: schemas.ProductSearch,
+    query: str,
+    brand: str = None,
+    page: int = 1,
+    per_page: int = 10,
     token: str = Depends(oauth2_scheme)
 ):
     results = search_products(
-        search.query,
-        search.brand,
-        page=search.page,
-        per_page=search.per_page
+        query,
+        brand,
+        page=page,
+        per_page=per_page
     )
     return results
 
-@app.post("/search/visual/")
-async def visual_search_endpoint(
-    search: schemas.VisualSearch,
+@app.get("/search/visual/")
+async def visual_search_url_endpoint(
+    image_url: str = Query(..., description="URL of the image to search"),
+    page: int = 1,
+    per_page: int = 10,
     token: str = Depends(oauth2_scheme)
 ):
-    results = search_by_image(
-        search.image_url,
-        page=search.page,
-        per_page=search.per_page
-    )
-    return results
+    try:
+        results = search_by_image(
+            image_url,
+            page=page,
+            per_page=per_page
+        )
+        
+        if results is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to perform visual search"
+            )
+            
+        return results
+        
+    except Exception as e:
+        print(f"Error in visual search endpoint: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+@app.post("/search/visual/")
+async def visual_search_file_endpoint(
+    request: Request,
+    file: UploadFile = File(...),
+    page: int = 1,
+    per_page: int = 10,
+    token: str = Depends(oauth2_scheme)
+):
+    try:
+        # Create a unique filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{timestamp}_{file.filename}"
+        filepath = os.path.join(UPLOAD_DIR, filename)
+        
+        # Save the uploaded file
+        async with aiofiles.open(filepath, 'wb') as out_file:
+            content = await file.read()
+            await out_file.write(content)
+        
+        # Generate the public URL for the image
+        base_url = str(request.base_url)
+        image_url = f"{base_url}uploads/{filename}"
+        
+        # Pass the image URL to the search function
+        results = search_by_image(
+            image_url,
+            page=page,
+            per_page=per_page
+        )
+        
+        if results is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to perform visual search"
+            )
+            
+        return results
+        
+    except Exception as e:
+        print(f"Error in visual search endpoint: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 # Add this line after creating the FastAPI app but before other routes
 app.include_router(views_router)

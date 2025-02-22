@@ -18,15 +18,4 @@ class User(UserBase):
 
 class Token(BaseModel):
     access_token: str
-    token_type: str
-
-class ProductSearch(BaseModel):
-    query: str
-    brand: Optional[str] = None
-    page: Optional[int] = 1
-    per_page: Optional[int] = 10
-
-class VisualSearch(BaseModel):
-    image_url: str
-    page: Optional[int] = 1
-    per_page: Optional[int] = 10 
+    token_type: str 

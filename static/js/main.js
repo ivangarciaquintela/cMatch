@@ -249,6 +249,7 @@ async function handleVisualSearch() {
 
         if (response.ok) {
             const results = await response.json();
+            console.log(results);
             displaySearchResults(results);
         } else if (response.status === 401) {
             alert('Unauthorized. Please log in.'); // Handle unauthorized access

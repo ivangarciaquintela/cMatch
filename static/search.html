@@ -29,9 +29,15 @@
         <div class="visual-search-section">
             <h2>Visual Search</h2>
             <div class="visual-search-container">
-                <input type="file" id="imageUpload" accept="image/*">
-                <button onclick="handleVisualSearch()">Search by Image</button>
-                <div id="imagePreview" style="margin-top: 10px;"></div>
+                <div class="upload-section">
+                    <input type="file" id="imageUpload" accept="image/*">
+                    <button onclick="handleVisualSearch('file')">Search by Image File</button>
+                    <div id="imagePreview" style="margin-top: 10px;"></div>
+                </div>
+                <div class="url-section" style="margin-top: 20px;">
+                    <input type="text" id="imageUrl" placeholder="Enter image URL...">
+                    <button onclick="handleVisualSearch('url')">Search by Image URL</button>
+                </div>
             </div>
         </div>
 
