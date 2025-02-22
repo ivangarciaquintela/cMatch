@@ -1,17 +1,23 @@
 # visual_search.py
-
+from inditex_api import InditexAPI
 import requests
 from config import API_TOKEN, VISUAL_SEARCH_BASE_URL
 import json
 
-def search_by_image(image_url, page=1, per_page=5): #valores por defecto
+def search_by_image(image_url, page=1, per_page=5):
     """
     Búsqueda visual con paginación.
     """
+    api = InditexAPI()  # Crea instancia de la clase InditexAPI
+    token = api.get_token()    # Obtiene el token
+
+    if not token:  # Manejar el caso donde el token no se puede obtener
+      print("Error: No se pudo obtener el token de autenticación.")
+      return None
+
     headers = {
         "accept": "application/json",
-        "Authorization": f"Bearer {API_TOKEN}"  # ¡Usamos Bearer Token!
-        # "Content-Type": "application/json"   <- No es necesario en GET
+        "Authorization": f"Bearer {token}"  # Usar token desde la instancia
     }
     params = {
         "image": image_url,
