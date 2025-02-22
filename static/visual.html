@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cMatch - Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos para el área de previsualización */
+        .preview-image {
+            max-width: 150px;
+            max-height: 150px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Estilos para el toggle cuadrado */
+       .toggle-container {
+            width: 120px; /* Ancho del toggle */
+            height: 40px; /* Alto del toggle */
+            position: relative;
+            display: inline-block; /* Para que ocupe solo el espacio necesario */
+        }
+
+        .toggle-input {
+            display: none; /* Oculta el checkbox real */
+        }
+
+        .toggle-label {
+            display: flex;
+            justify-content: space-between; /* Distribuye el espacio uniformemente */
+            align-items: center; /* Centra verticalmente */
+            width: 100%;
+            height: 100%;
+            background-color: #0000; /* Color de fondo (desactivado) */
+            border-radius: 4px; /* Bordes ligeramente redondeados */
+            cursor: pointer;
+            transition: background-color 0.3s;
+            overflow: hidden; /* Importante para que el texto no se salga */
+            border: 1px solid #999;
+        }
+
+        .toggle-text {
+            width: 50%; /* Cada texto ocupa la mitad */
+            text-align: center;
+            color: #333;  /* Color del texto (desactivado) */
+            transition: color 0.3s, transform 0.3s;  /* Transiciones suaves del color y posición*/
+            position: relative; /* Necesario para el z-index */
+            z-index: 2; /* Asegura que el texto esté sobre el fondo */
+            font-size: 0.9em; /* Ajusta según necesidad */
+            user-select: none; /*Evita la seleccion de texto en toggle*/
+
+        }
+
+         .toggle-background { /* Nuevo elemento para el fondo deslizante */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%; /* Inicialmente, cubre la mitad izquierda */
+            height: 100%;
+            background-color: #0000; /* Color de fondo (activado - verde) */
+            border-radius: 3px; /* Bordes ligeramente redondeados */
+            transition: transform 0.3s; /* Transición suave */
+             /* Detrás del texto */
+        }
+
+        /* Estilos cuando el toggle está activado */
+        .toggle-input:checked + .toggle-label {
+            background-color: #0000; 
+        }
+
+        .toggle-input:checked + .toggle-label .toggle-background {
+            transform: translateX(100%); /* Mueve el fondo a la derecha */
+        }
+        .toggle-input:checked + .toggle-label .url-text{
+            color: #000;
+            
+        }
+
+        .toggle-input:checked + .toggle-label .photo-text {
+            color: #0000; /* Texto negro cuando está desactivado (URL seleccionada) */
+            
+        }
+        /* URL seleccionado*/
+        .toggle-input + .toggle-label .url-text{
+            color: #0000;
+            
+        }
+        /* Photo texto seleccionado debe ser blanco*/
+        .toggle-input + .toggle-label .photo-text {
+            color: #000; /* Texto blanco cuando está activo*/
+        }
+
+
+
+    </style>
+</head>
+<body class="bg-white">
+    <div class="container mx-auto p-5">
+        <!-- Navbar (sin cambios) -->
+        <nav class="nav-bar flex items-center justify-between mb-8">
+            <div class="logo text-2xl font-bold text-gray-800">cMatch</div>
+            <div class="nav-links flex space-x-16">
+            <a href="/user"  class="text-gray-700 hover:underline">USER</a>
+            <a href="/wishlist"  class="text-gray-700 hover:underline">WISHLIST</a>
+            <a href="/closset"  class="text-gray-700 hover:underline">CLOSSET</a>
+            <a href="/stylia"  class="text-gray-700 hover:underline">STYLIA</a>
+            <button id="logoutBtn" class="nav-btn bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">LOG OUT</button>
+            </div>
+        </nav>
+
+        <!-- Visual Search Section -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Visual Search</h2>
+
+            <!-- Toggle Switch (Cuadrado) -->
+           <div class="toggle-container">
+                <input type="checkbox" id="searchTypeToggle" class="toggle-input">
+                <label for="searchTypeToggle" class="toggle-label">
+                    <span class="toggle-text url-text">URL</span>
+                    <span class="toggle-background"></span>
+                    <span class="toggle-text photo-text">PHOTO</span>
+                </label>
+            </div>
+
+
+            <div class="bg-white p-4 rounded-lg shadow mt-4">  <!-- Agregué un margen superior aquí -->
+                <!-- Drag-and-Drop Area (inicialmente visible) -->
+                <div id="dragAndDropArea" class="mb-4">
+                    <div class="flex items-center justify-center w-full">
+                        <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                </svg>
+                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p class="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                            </div>
+                            <input id="dropzone-file" type="file" class="hidden" accept="image/*" />
+                        </label>
+                    </div>
+                    <div id="imagePreview" class="mt-2 flex flex-wrap"></div>
+                </div>
+
+              <!-- URL Input (inicialmente oculto) -->
+                <div id="urlInputArea" class="hidden">
+                    <input type="text" id="imageUrl" placeholder="Enter image URL..." class="w-full px-4 py-2 border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="handleVisualSearch('url')" class="search-button w-full px-4 py-2 bg-black text-white rounded hover:bg-black transition duration-200">Search by Image URL</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="searchResults" class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <!-- Results will be added here dynamically -->
+        </div>
+    </div>
+
+    <script src="/static/js/search.js"></script>
+    <script>
+    // --- Toggle Functionality ---
+    document.getElementById('searchTypeToggle').addEventListener('change', (event) => {
+        const dragAndDropArea = document.getElementById('dragAndDropArea');
+        const urlInputArea = document.getElementById('urlInputArea');
+
+        if (event.target.checked) {
+            // Mostrar URL input, ocultar drag-and-drop
+            dragAndDropArea.classList.add('hidden');
+            urlInputArea.classList.remove('hidden');
+        } else {
+            // Mostrar drag-and-drop, ocultar URL input
+            dragAndDropArea.classList.remove('hidden');
+            urlInputArea.classList.add('hidden');
+        }
+    });
+    // --- Drag and drop y previsualizacion imagen ---
+    function handleFileSelect(files) {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = ''; // Clear previous previews
+
+            for (const file of files) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file.'); // Basic file type validation
+                    continue;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'preview-image'; // Add class for styling
+                    imagePreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Event listener for the hidden file input
+        document.getElementById('dropzone-file').addEventListener('change', (event) => {
+            handleFileSelect(event.target.files);
+        });
+    </script>
+</body>
+</html>

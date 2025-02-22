@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>cMatch - Search</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <!--  <link rel="stylesheet" href="/static/css/search.css">  -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div class="container">
@@ -16,37 +17,24 @@
             </div>
         </nav>
 
-        <!-- Search Section -->
-        <div class="search-section">
-            <h2>Product Search</h2>
-            <div class="search-container">
-                <input type="text" id="searchQuery" placeholder="Search for products...">
-                <input type="text" id="searchBrand" placeholder="Brand (optional)">
-                <button onclick="handleSearch()">Search</button>
+        
+        <div class="flex-grow flex items-center justify-center py-48"> <!-- Añadido py-16 -->
+            <div class="contenedor-cuadrados flex space-x-4">
+                <a href="/product" class="relative w-64 h-64 transform hover:scale-115 transition duration-300">
+                    <img src="img/find.jpg" alt="Search Clothes" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10 text-white text-2xl font-bold">
+                        SEARCH CLOTHES
+                    </div>
+                </a>
+                <a href="/visual" class="relative w-64 h-64 transform hover:scale-115 transition duration-300">
+                    <img src="img/visual.jpg" alt="Find Clothes" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-2xl font-bold">
+                        FIND CLOTHES
+                    </div>
+                </a>
             </div>
-        </div>
-
-        <!-- Visual Search Section -->
-        <div class="visual-search-section">
-            <h2>Visual Search</h2>
-            <div class="visual-search-container">
-                <div class="upload-section">
-                    <input type="file" id="imageUpload" accept="image/*">
-                    <button onclick="handleVisualSearch('file')">Search by Image File</button>
-                    <div id="imagePreview" style="margin-top: 10px;"></div>
-                </div>
-                <div class="url-section" style="margin-top: 20px;">
-                    <input type="text" id="imageUrl" placeholder="Enter image URL...">
-                    <button onclick="handleVisualSearch('url')">Search by Image URL</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Search Results -->
-        <div id="searchResults" class="search-results">
-            <!-- Search results will be dynamically added here -->
         </div>
     </div>
     <script src="/static/js/search.js"></script>
 </body>
-</html> 
+</html>

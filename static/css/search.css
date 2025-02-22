@@ -15,6 +15,10 @@ body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
     background-color: #ffffff;
+
+    display: flex;
+    justify-content: center; /* Centrado horizontal */
+    align-items: center;
 }
 
 .container {
@@ -24,6 +28,7 @@ body {
 
 /* Navigation */
 .nav-bar {
+    border: 1px solid black;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -44,81 +49,28 @@ body {
     margin-left: 1rem;
     border: none;
     cursor: pointer;
-    background-color: black;
-    color: white;
-}
-
-/* Auth Forms */
-.auth-container {
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.auth-form {
-    background-color: rgba(0, 0, 0, 0.6);
-    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.2); 
-    padding: 2rem;
-    border : none;
-    text-align: center;
-    position: relative;
-}
-
-.auth-form h2 {
-    color: white;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.auth-form input {
-    width: 100%;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    border: 1px solid white;
-    background-color: black;
-    color : white;
-    display: inline-block; 
-}
-
-/* Search Section */
-.search-section {
     background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
+    color: black;
 }
 
-.search-container {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+.nav-btn:hover {
+    text-decoration: underline;
 }
 
-.search-container input {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.visual-search-section {
+.nav-a {
+    padding: 0.5rem 1rem;
+    margin-left: 1rem;
+    border: none;
+    cursor: pointer;
     background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
+    color: black;
+    text-decoration: none;
 }
 
-
-/* Results and History */
-.search-results,su
-.wishlist-section,
-.history-section {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
+.nav-a:hover {
+    text-decoration: underline;
 }
 
-/* Utility Classes */
 .hidden {
     display: none;
 }
@@ -132,32 +84,37 @@ button {
     font-size: 1.2rem;
 }
 
-button:hover {
-    background-color: black;
-    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.2); 
-    text-decoration: underline;
-    font-size: 1.2rem;
-} 
-
 .product-card {
     border: 1px black solid;
     margin : 5px;
     padding : 10 px;
 }
-.product-card * {
-    margin: 25px; /* Margen para *todos* los elementos dentro de .product-card */
+
+.contenedor-cuadrados {
+    display: flex;    
+    text-align: center;
+    position: relative;
+    vertical-align: center;
 }
 
-.imageUpload {
-    background-color: white;
-    color: black;
+.cuadrado {
+    width: 25rem;
+    height: 25rem;
+    margin: 2%;
 }
 
-#preview {
-    display: none; /* Inicialmente oculto */
-    position: absolute;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    padding: 10px;
-    z-index: 1000; /* Para que esté encima de otros elementos */
-  }
+.cuadrado:hover {
+    width: 30rem;
+    height: 30rem;
+    margin: 10px;
+}
+
+
+.rojo {
+    background-color: red;
+}
+
+.azul {
+    background-color: blue;
+}
+    

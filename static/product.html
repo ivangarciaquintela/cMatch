@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cMatch - Search</title>
+    <!-- No es necesario un archivo CSS separado, Tailwind se maneja inline -->
+    <!--  <link rel="stylesheet" href="/static/css/style.css">  -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>   //Configuracion tailwindcss, no se necesita si no hay personalizacion
+        tailwind.config = {
+            theme: {
+                extend: {
+                    // Agrega tus personalizaciones aquí, por ejemplo:
+                    colors: {
+                        'primary': '#yourcolor',  // Reemplaza con tu color
+                    },
+                    fontFamily: {
+                        'sans': ['YourFont', 'sans-serif'], // Reemplaza con tu fuente
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white-100">  <!-- Agrego un fondo gris claro -->
+    <div class="container mx-auto p-5"> <!-- Contenedor principal, centrado y con padding -->
+        <nav class="nav-bar flex items-center justify-between mb-8">  <!--  Flexbox para la navegación -->
+            <div class="logo text-2xl font-bold text-black-800">cMatch</div>  <!--  Estilos para el logo -->
+            <div class="nav-links flex space-x-16"> <!-- Flexbox y espaciado entre los enlaces -->
+                <a href="/user"  class="text-black-700 hover:underline">USER</a>
+                <a href="/wishlist"  class="text-black-700 hover:underline">WISHLIST</a>
+                <a href="/closset"  class="text-black-700 hover:underline">CLOSSET</a>
+                <a href="/stylia"  class="text-black-700 hover:underline">STYLIA</a> <!-- Estilo para botón "STYLIA" -->
+                <button id="logoutBtn" class="nav-btn bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">LOG OUT</button> 
+            </div>
+        </nav>
+
+        <!-- Search Section -->
+        <div class="mt-8"> <!-- Margen superior -->
+            <h2 class="text-2xl font-semibold mb-4">Product Search</h2> <!-- Título con estilo -->
+            <div class="bg-white p-4 shadow"> <!-- Contenedor con fondo, padding, bordes y sombra -->
+                <input type="text" id="searchQuery" placeholder="Search for products..." class="w-full px-4 py-2 border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> <!-- Estilo para el input -->
+                <input type="text" id="searchBrand" placeholder="Brand (optional)" class="w-full px-4 py-2 border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">   <!-- Estilo para el input de marca-->
+                 <button onclick="handleSearch()" class="w-full px-4 py-2 text-black-700 hover:bg-black hover:text-white transition duration-200">Search</button>  <!-- Botón de búsqueda -->
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="searchResults" class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <!-- Los resultados se agregarán aquí dinámicamente -->
+        </div>
+    </div>
+    <script src="/static/js/search.js"></script>
+</body>
+</html>

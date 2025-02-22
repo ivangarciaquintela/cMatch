@@ -27,8 +27,7 @@ def search_products(query, brand, page=1, per_page=5):
 
     headers = {
         "accept": "application/json",
-        "Authorization": f"Bearer {token}", 
-        "User-Agent": "cMatch/1.0"
+        "Authorization": f"Bearer {token}", # Use the obtained token
     }
     params = {
         "query": query,

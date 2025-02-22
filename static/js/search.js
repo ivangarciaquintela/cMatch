@@ -127,44 +127,86 @@ async function handleVisualSearch(method) {
     }
 }
 
-// Display Search Results
 function displaySearchResults(results) {
     const resultsContainer = document.getElementById('searchResults');
-    resultsContainer.innerHTML = '';
-    
+    resultsContainer.innerHTML = '';  // Clear previous results
+
     const resultsHeader = document.createElement('h2');
     resultsHeader.textContent = 'Results:';
+    resultsHeader.className = "text-2xl font-semibold mb-4"; // Tailwind classes
     resultsContainer.appendChild(resultsHeader);
 
+    if (!results || results.length === 0) {
+        const noResults = document.createElement('p');
+        noResults.textContent = 'No results found.';
+        noResults.className = "text-gray-600";
+        resultsContainer.appendChild(noResults);
+        return;
+    }
+
+    // Create a scrollable container for the list
+    const scrollableContainer = document.createElement('div');
+    scrollableContainer.className = 'overflow-y-auto max-h-[60vh]'; // Key change: Enable vertical scrolling
+
     results.forEach(product => {
-        const productElement = document.createElement('div');
-        productElement.className = 'product-card';
+        const productCard = document.createElement('div');
+        productCard.className = 'bg-white rounded-lg shadow-md overflow-hidden mb-4 product-card'; // mb-4 for spacing
 
         const productLink = document.createElement('a');
         productLink.href = product.link;
-        productLink.style.textDecoration = 'none';
-        productLink.style.color = 'inherit';
+        productLink.className = 'block no-underline text-current hover:text-current';
 
-        let productHTML = `
-            <h3>${product.name}</h3>
-            <p style="font-weight: bold;">${product.brand.toUpperCase()}</p>
-            <p>`;
-
-        if (product.price?.value?.current !== undefined && product.price?.currency) {
-            productHTML += `Price: ${product.price.value.current} ${product.price.currency}`;
-        } else {
-            productHTML += 'Price: N/A';
+        if (product.image) {
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'relative h-48 overflow-hidden'; // or any desired height
+            const productImage = document.createElement('img');
+            productImage.src = product.image;
+            productImage.alt = product.name || 'Product Image';
+            productImage.className = 'absolute inset-0 w-full h-full object-cover';
+            imageContainer.appendChild(productImage);
+            productLink.appendChild(imageContainer);
         }
 
-        productHTML += `</p>
-            <button onclick="addToWishlist(${product.id})">Add to Wishlist</button>
-        `;
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'p-4';
 
-        productElement.innerHTML = productHTML;
-        productLink.appendChild(productElement);
-        resultsContainer.appendChild(productLink);
+        const productName = document.createElement('h3');
+        productName.textContent = product.name || 'No Name';
+        productName.className = 'text-lg font-semibold text-gray-800';
+        contentContainer.appendChild(productName);
+
+        const productBrand = document.createElement('p');
+        productBrand.textContent = product.brand ? product.brand.toUpperCase() : 'N/A';
+        productBrand.className = 'text-sm font-bold text-gray-700';
+        contentContainer.appendChild(productBrand);
+
+        const productPrice = document.createElement('p');
+        productPrice.className = "text-base text-gray-900";
+        if (product.price?.value?.current !== undefined && product.price?.currency) {
+            productPrice.textContent = `Price: ${product.price.value.current} ${product.price.currency}`;
+        } else {
+            productPrice.textContent = 'Price: N/A';
+        }
+        contentContainer.appendChild(productPrice);
+
+        const wishlistButton = document.createElement('button');
+        wishlistButton.textContent = 'Add to Wishlist';
+        wishlistButton.className = 'mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200';
+
+        wishlistButton.onclick = () => {
+            addToWishlist(product.id);
+        };
+        contentContainer.appendChild(wishlistButton);
+
+        productLink.appendChild(contentContainer);
+        productCard.appendChild(productLink);
+        scrollableContainer.appendChild(productCard); // Add to scrollable container
     });
+
+    resultsContainer.appendChild(scrollableContainer); // Add scrollable container to results
 }
+
+
 
 // Handle Logout
 function handleLogout() {
