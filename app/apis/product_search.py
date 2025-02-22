@@ -1,7 +1,7 @@
 # product_search.py
 from .inditex_api import InditexAPI
 import requests
-from config import VISUAL_SEARCH_BASE_URL  # Import the correct base URL
+from config import PRODUCT_SEARCH_BASE_URL  # Import the correct base URL
 import json
 
 
@@ -29,7 +29,7 @@ def search_products(query, brand, page=1, per_page=5):
 
     try:
         # Use VISUAL_SEARCH_BASE_URL,  OR  create and use a separate PRODUCT_SEARCH_BASE_URL in config.py
-        response = requests.get(VISUAL_SEARCH_BASE_URL, headers=headers, params=params)  # Or your product search URL
+        response = requests.get(PRODUCT_SEARCH_BASE_URL, headers=headers, params=params)  # Or your product search URL
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:

@@ -1,5 +1,5 @@
 # visual_search.py
-from inditex_api import InditexAPI
+from .inditex_api import InditexAPI
 import requests
 from config import API_TOKEN, VISUAL_SEARCH_BASE_URL
 import json
