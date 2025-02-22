@@ -156,7 +156,8 @@
                     <!-- Container for preview images and search button -->
                     <div id="imagePreviewContainer">
                          <div id="imagePreview" class="mt-2 flex flex-wrap"></div>
-                         <!-- Search button will be added here dynamically -->
+                         <!--  Search button  -->
+                         <button id="searchByImageButton" class="search-button text-black w-full px-4 py-2 rounded hover:bg-black hover:text-white transition duration-200" onclick="handleVisualSearch('image')">Search by Image</button>
                     </div>
                 </div>
 
@@ -179,14 +180,17 @@
     document.getElementById('searchTypeToggle').addEventListener('change', (event) => {
         const dragAndDropArea = document.getElementById('dragAndDropArea');
         const urlInputArea = document.getElementById('urlInputArea');
+        const searchByImageButton = document.getElementById('searchByImageButton');
 
         if (event.target.checked) {
             dragAndDropArea.classList.add('hidden');
             urlInputArea.classList.remove('hidden');
              clearImagePreview(); // Clear preview when switching to URL mode
+            searchByImageButton.classList.add('hidden'); // Hide button in URL mode.
         } else {
             dragAndDropArea.classList.remove('hidden');
             urlInputArea.classList.add('hidden');
+              // Don't immediately show button here.  Only show on image add.
         }
     });
 
@@ -194,6 +198,7 @@
        function handleFileSelect(files) {
         const imagePreview = document.getElementById('imagePreview');
         const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const searchByImageButton = document.getElementById('searchByImageButton');
         imagePreview.innerHTML = ''; // Clear previous previews
         let hasImages = false; // Flag to track if any valid images were processed
 
@@ -215,37 +220,21 @@
             reader.readAsDataURL(file);
         }
 
-         // Only add the button if valid images were added
+         // Only add show the button button if valid images were added
          if (hasImages){
-            addSearchButton();
+             searchByImageButton.classList.remove('hidden');
          } else {
-            removeSearchButton();
+             searchByImageButton.classList.add('hidden');
          }
     }
 
-    function addSearchButton() {
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        // Check if the button already exists
-        if (!document.getElementById('searchByImageButton')) {
-            const button = document.createElement('button');
-            button.id = 'searchByImageButton';
-            button.textContent = 'Search by Image';
-            button.className = 'search-button text-black w-full px-4 py-2  rounded hover:bg-black hover:text-white transition duration-200';  // Tailwind classes
-            button.onclick = () => handleVisualSearch('image'); // Call your search handler
-            imagePreviewContainer.appendChild(button);
-        }
-    }
+    // No need for addSearchButton or removeSearchButton  functions anymore
 
-    function removeSearchButton(){
-      const button = document.getElementById('searchByImageButton');
-        if(button){
-          button.remove();
-        }
-    }
      function clearImagePreview() {
         const imagePreview = document.getElementById('imagePreview');
+         const searchByImageButton = document.getElementById('searchByImageButton');
         imagePreview.innerHTML = ''; // Clear the preview
-        removeSearchButton();      // Remove the search button
+        searchByImageButton.classList.add('hidden');   // Hide the search button
     }
 
     // Event listeners

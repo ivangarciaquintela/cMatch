@@ -50,11 +50,13 @@ async function handleSearch() {
 // Handle Visual Search
 async function handleVisualSearch(method) {
     const token = checkAuth();
+    console.log(method)
     if (!token) return;
 
     let searchButton;
     let formData = new FormData();
     let endpoint = '/search/visual/';
+    console.log(method)
     
     if (method === 'file') {
         const fileInput = document.getElementById('imageUpload');
