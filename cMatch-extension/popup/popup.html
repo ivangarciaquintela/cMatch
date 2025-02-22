@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <form id="loginForm" class="login-form">
+            <h2>Login to cMatch</h2>
+            <input type="email" id="loginEmail" placeholder="Email" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <p class="register-link">
+                Don't have an account? 
+                <a href="#" id="registerLink" target="_blank">Register</a>
+            </p>
+        </form>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="main-content active">
+            <div class="header">
+                <h1>cMatch</h1>
+                <div class="auth-status">
+                    <span id="userStatus">Not logged in</span>
+                    <button id="authButton">Login</button>
+                </div>
+            </div>
+
+            <div class="search-toggle">
+                <button id="textSearchToggle" class="toggle-btn active">Text Search</button>
+                <button id="visualSearchToggle" class="toggle-btn">Visual Search</button>
+            </div>
+
+            <div id="searchForms">
+                <!-- Text Search Form -->
+                <div id="textSearchForm" class="search-form active">
+                    <input type="text" id="searchQuery" placeholder="Search for products...">
+                    <input type="text" id="searchBrand" placeholder="Brand (optional)">
+                    <button id="searchButton">Search</button>
+                </div>
+
+                <!-- Visual Search Form -->
+                <div id="visualSearchForm" class="search-form">
+                    <div class="visual-search-options">
+                        <input type="text" id="imageUrl" placeholder="Enter image URL...">
+                        <button id="visualSearchButton">Search</button>
+                        <div class="separator">OR</div>
+                        <button id="selectImageButton" class="secondary-button">Select from page</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="results" class="results-container">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html> 

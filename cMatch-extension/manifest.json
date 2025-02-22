@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "cMatch Fashion Search",
+  "version": "1.0",
+  "description": "Search for fashion items using text or image URLs",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://100.83.166.6:8000/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/screenshot.js"],
+      "css": ["content/screenshot.css"]
+    }
+  ]
+} 

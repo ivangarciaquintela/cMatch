@@ -1,0 +1,12 @@
+#cmatch-selection-box {
+    position: fixed;
+    border: 2px solid #000;
+    background: rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    z-index: 10000;
+    display: none;
+}
+
+body.cmatch-selecting {
+    cursor: crosshair !important;
+} 
