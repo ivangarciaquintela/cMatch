@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fashion API Test Interface</h1>
+
+    <div class="section">
+        <h2>User Registration</h2>
+        <input type="email" id="reg-email" placeholder="Email">
+        <input type="text" id="reg-username" placeholder="Username">
+        <input type="password" id="reg-password" placeholder="Password">
+        <button onclick="register()">Register</button>
+        <div id="register-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Login</h2>
+        <input type="email" id="login-email" placeholder="Email">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <div id="login-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Product Search</h2>
+        <input type="text" id="search-query" placeholder="Search query">
+        <input type="text" id="search-brand" placeholder="Brand (optional)">
+        <button onclick="searchProducts()">Search</button>
+        <div id="search-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Visual Search</h2>
+        <input type="text" id="image-url" placeholder="Image URL">
+        <button onclick="visualSearch()">Search</button>
+        <div id="visual-result" class="result"></div>
+    </div>
+
+    <script>
+        let token = '';
+
+        async function register() {
+            const email = document.getElementById('reg-email').value;
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const response = await fetch('/users/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, username, password })
+                });
+                const result = await response.json();
+                document.getElementById('register-result').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('register-result').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const formData = new FormData();
+                formData.append('username', email);  // API expects email in username field
+                formData.append('password', password);
+
+                const response = await fetch('/token', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                token = result.access_token;
+                document.getElementById('login-result').textContent = 'Login successful! Token: ' + token;
+            } catch (error) {
+                document.getElementById('login-result').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function searchProducts() {
+            const query = document.getElementById('search-query').value;
+            const brand = document.getElementById('search-brand').value;
+
+            try {
+                const response = await fetch('/search/products/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        query,
+                        brand,
+                        page: 1,
+                        per_page: 10
+                    })
+                });
+                const result = await response.json();
+                document.getElementById('search-result').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('search-result').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function visualSearch() {
+            const imageUrl = document.getElementById('image-url').value;
+
+            try {
+                const response = await fetch('/search/visual/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        image_url: imageUrl,
+                        page: 1,
+                        per_page: 5
+                    })
+                });
+                const result = await response.json();
+                document.getElementById('visual-result').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('visual-result').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html> 

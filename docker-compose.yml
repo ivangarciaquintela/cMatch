@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./static:/app/static
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/fashion_db
+      - SECRET_KEY=your-secret-key-here
+    depends_on:
+      - db
+    command: uvicorn app.main:app --host 0.0.0.0 --reload
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=fashion_db
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data: 
