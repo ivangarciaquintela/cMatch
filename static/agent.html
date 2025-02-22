@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cMatch - Fashion Agent</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .agent-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .query-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .recommendations {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .recommendation-content {
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            line-height: 1.5;
+        }
+        
+        .recommendation-content strong {
+            color: #333;
+        }
+        
+        .recommendation-content a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        
+        .recommendation-content a:hover {
+            text-decoration: underline;
+        }
+        
+        .recommendation-content br {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-bar">
+            <div class="logo">cMatch</div>
+            <div class="nav-links">
+                <a href="/search" class="nav-btn">SEARCH</a>
+                <button id="logoutBtn" class="nav-btn">LOG OUT</button>
+            </div>
+        </nav>
+
+        <div class="agent-container">
+            <h2>Fashion Advisor AI</h2>
+            <p>Describe what you're looking for, and I'll help you find the perfect outfit!</p>
+            
+            <textarea 
+                id="queryInput" 
+                class="query-input" 
+                rows="4" 
+                placeholder="Example: What should I wear for a formal night out?"
+            ></textarea>
+            
+            <button id="askButton" onclick="getRecommendations()">Get Recommendations</button>
+            
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Our AI is crafting your perfect outfit recommendation...</p>
+                <p>(This may take a while)</p>
+            </div>
+            
+            <div id="recommendations" class="recommendations">
+                <!-- Recommendations will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function getRecommendations() {
+            const queryInput = document.getElementById('queryInput');
+            const loading = document.getElementById('loading');
+            const recommendations = document.getElementById('recommendations');
+            const askButton = document.getElementById('askButton');
+            
+            const query = queryInput.value.trim();
+            if (!query) {
+                alert('Please enter a query');
+                return;
+            }
+            
+            // Show loading state and clear previous results
+            loading.style.display = 'block';
+            recommendations.style.display = 'none';
+            recommendations.innerHTML = '';
+            askButton.disabled = true;
+            
+            try {
+                // Remove the abort controller since we want to wait for the full response
+                const response = await fetch(
+                    `/agent/clothing-recommendations/?query=${encodeURIComponent(query)}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        }
+                    }
+                );
+                
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to get recommendations');
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'error') {
+                    throw new Error(data.message);
+                }
+                
+                // Clean and format the message
+                let formattedMessage = data.message || '';
+                formattedMessage = formattedMessage
+                    .replace(/\\\\/g, '')
+                    .replace(/\\n/g, '\n')
+                    .replace(/\\/g, '')
+                    .trim();
+                
+                // Convert markdown and newlines to HTML
+                formattedMessage = formattedMessage
+                    .split('\n')
+                    .filter(line => line.trim() !== '')
+                    .map(line => line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'))
+                    .join('<br>');
+                
+                // Display the formatted message
+                recommendations.style.display = 'block';
+                if (formattedMessage) {
+                    recommendations.innerHTML = `
+                        <div class="recommendation-content">
+                            ${formattedMessage}
+                        </div>
+                    `;
+                } else {
+                    recommendations.innerHTML = `
+                        <div class="recommendation-content">
+                            No recommendations available at this time.
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                recommendations.style.display = 'block';
+                recommendations.innerHTML = `
+                    <div style="color: red; padding: 10px; background: #fff1f1; border-radius: 4px;">
+                        ${error.message || 'An error occurred while getting recommendations'}
+                    </div>
+                `;
+            } finally {
+                loading.style.display = 'none';
+                askButton.disabled = false;
+            }
+        }
+
+        // Add event listener for Enter key in textarea
+        document.getElementById('queryInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                getRecommendations();
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login';
+        });
+    </script>
+</body>
+</html> 

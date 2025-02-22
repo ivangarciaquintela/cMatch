@@ -7,18 +7,28 @@ import json
 
 def search_products(query, brand, page=1, per_page=5):
     """
-    Busca productos con paginación, usando la clase InditexAPI para la autenticación.
+    Search products with pagination using the InditexAPI class for authentication.
+    
+    Args:
+        query (str): Search term for the product
+        brand (str): Brand to search in (e.g., 'zara')
+        page (int): Page number for pagination
+        per_page (int): Number of results per page
+        
+    Returns:
+        dict: JSON response containing product results or None if error
     """
-    api = InditexAPI()  # Create an instance of InditexAPI
-    token = api.get_token()  # Get the token
-    # print(token)
+    api = InditexAPI()
+    token = api.get_token()
+    
     if not token:
-        print("Error: No se pudo obtener el token de autenticación.")
+        print("Error: Could not obtain authentication token.")
         return None
 
     headers = {
         "accept": "application/json",
-        "Authorization": f"Bearer {token}", # Use the obtained token
+        "Authorization": f"Bearer {token}", 
+        "User-Agent": "cMatch/1.0"
     }
     params = {
         "query": query,

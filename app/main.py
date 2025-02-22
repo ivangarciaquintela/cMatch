@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Request, Query
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Request, Query, Header
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
@@ -9,6 +9,8 @@ from fastapi.responses import RedirectResponse
 import base64
 import aiofiles
 from datetime import datetime
+import requests
+import json
 
 # Use relative imports since we're inside the app package
 from .models.database import User, Base
@@ -90,8 +92,19 @@ async def search_products_endpoint(
     brand: str = None,
     page: int = 1,
     per_page: int = 10,
-    token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme),
+    authorization: str = Header(None)
 ):
+    # Allow internal requests from the agent service
+    if authorization == f"Bearer {os.getenv('INTERNAL_TOKEN')}":
+        pass
+    # For regular users, verify their token
+    elif not token:
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated"
+        )
+
     results = search_products(
         query,
         brand,
@@ -176,6 +189,52 @@ app.include_router(views_router)
 
 # Add this line after your other app.include_router() calls
 app.include_router(user_items_router, prefix="/api", tags=["user items"])
+
+# Add this endpoint after your other endpoints
+@app.get("/agent/clothing-recommendations/")
+async def clothing_recommendations_endpoint(
+    query: str,
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Get clothing recommendations based on natural language query.
+    """
+    try:
+        # Forward the request to the agent service using requests
+        response = requests.get(
+            f"http://agent:8001/recommendations",
+            params={"query": query},
+            timeout=300  # 5 minute timeout
+        )
+        response.raise_for_status()
+        data = response.json()
+        
+        # Ensure we're returning a properly formatted response
+        if isinstance(data, dict) and "status" in data and "message" in data:
+            return data
+        else:
+            return {
+                "status": "success",
+                "message": data if isinstance(data, str) else json.dumps(data)
+            }
+            
+    except requests.Timeout:
+        raise HTTPException(
+            status_code=504,
+            detail="Request to agent service timed out"
+        )
+    except requests.RequestException as e:
+        print(f"Agent service error: {str(e)}")  # Add logging
+        raise HTTPException(
+            status_code=500,
+            detail=f"Agent service error: {str(e)}"
+        )
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")  # Add logging
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred"
+        )
 
 # Remove or comment out the existing root route
 # @app.get("/")

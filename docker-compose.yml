@@ -9,9 +9,22 @@ services:
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/fashion_db
       - SECRET_KEY=your-secret-key-here
+      - INTERNAL_TOKEN=YOU-API-KEY
     depends_on:
       - db
+      - agent
     command: uvicorn app.main:app --host 0.0.0.0 --reload
+
+  agent:
+    build: 
+      context: .
+      dockerfile: Dockerfile.agent
+    ports:
+      - "8001:8001"
+    environment:
+      - HF_TOKEN=YOU-API-KEY
+      - INTERNAL_TOKEN=YOU-API-KEY
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
   db:
     image: postgres:13
