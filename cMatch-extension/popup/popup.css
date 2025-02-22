@@ -31,6 +31,7 @@ body {
 .search-toggle {
     display: flex;
     gap: 8px;
+    margin-top: 16px;
     margin-bottom: 16px;
 }
 
@@ -218,4 +219,62 @@ button:hover {
 .secondary-button:hover {
     background: #f0f0f0;
     opacity: 1;
+}
+
+.screenshot-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+.button-container button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.button-container .secondary-button {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+}
+
+.button-container .secondary-button:hover {
+    background: #f0f0f0;
+}
+
+.canvas-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+#screenshotCanvas {
+    max-width: 100%;
+    height: auto;
+}
+
+#selection-box {
+    position: absolute;
+    border: 2px solid #000;
+    background: rgba(0, 0, 0, 0.1);
+    display: none;
+    pointer-events: none;
+}
+
+.screenshot-preview {
+    max-height: 70vh;
+    overflow: auto;
 } 

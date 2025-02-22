@@ -6,10 +6,10 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "tabs"
   ],
   "host_permissions": [
-    "http://100.83.166.6:8000/*"
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -24,11 +24,7 @@
     "48": "assets/icon48.png",
     "128": "assets/icon128.png"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content/screenshot.js"],
-      "css": ["content/screenshot.css"]
-    }
-  ]
+  "background": {
+    "service_worker": "background.js"
+  }
 } 

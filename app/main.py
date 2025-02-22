@@ -138,7 +138,7 @@ async def visual_search_file_endpoint(
     try:
         # Read the file content
         content = await file.read()
-        
+        print(content)
         # Upload to ImgBB
         image_url = upload_image_to_imgbb(content, name=file.filename)
         
@@ -147,14 +147,14 @@ async def visual_search_file_endpoint(
                 status_code=500,
                 detail="Failed to upload image"
             )
-        
+        print(image_url)
         # Pass the ImgBB URL to the search function
         results = search_by_image(
             image_url,
             page=page,
             per_page=per_page
         )
-        
+        print(results)
         if results is None:
             raise HTTPException(
                 status_code=500,

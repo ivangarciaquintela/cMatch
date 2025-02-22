@@ -229,30 +229,141 @@ function displayResults(results) {
     });
 }
 
-// Add this function to your existing popup.js
+// Update the handleImageSelection function to properly handle the image data
 async function handleImageSelection() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    // Minimize popup
-    window.blur();
-    
     try {
-        const response = await chrome.tabs.sendMessage(tab.id, { action: 'startSelection' });
-        
-        if (response && response.imageData) {
-            // Upload the image data to your server or use it directly
-            const imageBlob = await (await fetch(response.imageData)).blob();
-            const formData = new FormData();
-            formData.append('file', imageBlob, 'screenshot.jpg');
+        // First, capture the screenshot
+        chrome.runtime.sendMessage({action: 'captureTab'}, async function(response) {
+            if (response && response.imageData) {
+                // Show the screenshot in a canvas for selection
+                const resultsContainer = document.getElementById('results');
+                resultsContainer.innerHTML = `
+                    <div class="screenshot-preview">
+                        <div class="canvas-container">
+                            <canvas id="screenshotCanvas"></canvas>
+                            <div id="selection-box"></div>
+                        </div>
+                        <div class="button-container">
+                            <button id="confirmSearch">Search with selection</button>
+                            <button id="cancelSearch" class="secondary-button">Cancel</button>
+                        </div>
+                    </div>
+                `;
+
+                const canvas = document.getElementById('screenshotCanvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    initializeSelection(canvas);
+                };
+                img.src = response.imageData;
+
+                document.getElementById('cancelSearch').addEventListener('click', () => {
+                    resultsContainer.innerHTML = '';
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Screenshot error:', error);
+        alert('Failed to capture screenshot. Please try again.');
+    }
+}
+
+// Update the initializeSelection function to properly handle the image data
+function initializeSelection(canvas) {
+    const selectionBox = document.getElementById('selection-box');
+    let isSelecting = false;
+    let startX, startY;
+
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+        isSelecting = true;
+
+        selectionBox.style.left = `${startX}px`;
+        selectionBox.style.top = `${startY}px`;
+        selectionBox.style.width = '0';
+        selectionBox.style.height = '0';
+        selectionBox.style.display = 'block';
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isSelecting) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+
+        const width = currentX - startX;
+        const height = currentY - startY;
+
+        selectionBox.style.width = `${Math.abs(width)}px`;
+        selectionBox.style.height = `${Math.abs(height)}px`;
+        selectionBox.style.left = `${width < 0 ? currentX : startX}px`;
+        selectionBox.style.top = `${height < 0 ? currentY : startY}px`;
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isSelecting = false;
+    });
+
+    document.getElementById('confirmSearch').addEventListener('click', async () => {
+        const token = await checkAuth();
+        if (!token) {
+            alert('Please log in first');
+            return;
+        }
+
+        showLoading();
+
+        try {
+            const selection = selectionBox.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
             
-            const token = await checkAuth();
-            if (!token) {
-                alert('Please log in first');
-                return;
+            // Create a new canvas for the cropped image
+            const cropCanvas = document.createElement('canvas');
+            const ctx = cropCanvas.getContext('2d');
+            
+            // Calculate selection coordinates relative to canvas
+            const x = (selection.left - canvasRect.left) * (canvas.width / canvasRect.width);
+            const y = (selection.top - canvasRect.top) * (canvas.height / canvasRect.height);
+            const width = selection.width * (canvas.width / canvasRect.width);
+            const height = selection.height * (canvas.height / canvasRect.height);
+            
+            cropCanvas.width = width;
+            cropCanvas.height = height;
+            
+            // Draw the selected portion
+            ctx.drawImage(
+                canvas,
+                x, y, width, height,
+                0, 0, width, height
+            );
+
+            // Get base64 data URL first
+            const dataUrl = cropCanvas.toDataURL('image/jpeg', 0.95);
+            
+            // Convert data URL to blob
+            const response = await fetch(dataUrl);
+            const blob = await response.blob();
+
+            // Verify blob was created correctly
+            if (!(blob instanceof Blob)) {
+                throw new Error('Failed to create valid blob from image');
             }
 
-            showLoading();
+            console.log('Blob created:', blob.type, blob.size);
 
+            // Create FormData and append the blob
+            const formData = new FormData();
+            formData.append('file', blob, 'screenshot.jpg');
+
+            // Send to API
             const apiResponse = await fetch(`${API_BASE_URL}/search/visual/`, {
                 method: 'POST',
                 headers: {
@@ -265,13 +376,16 @@ async function handleImageSelection() {
                 const results = await apiResponse.json();
                 displayResults(results);
             } else {
-                alert('Visual search failed. Please try again.');
+                const errorData = await apiResponse.json().catch(() => ({ detail: 'Unknown error occurred' }));
+                throw new Error(errorData.detail || 'API request failed');
             }
+        } catch (error) {
+            console.error('Visual search error:', error);
+            alert(`Visual search failed: ${error.message}`);
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
         }
-    } catch (error) {
-        console.error('Selection error:', error);
-        alert('Failed to capture selection. Please try again.');
-    }
+    });
 }
 
 // Initialize
