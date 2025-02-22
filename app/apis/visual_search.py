@@ -21,7 +21,8 @@ def search_by_image(image_url, page=1, per_page=5):
 
     headers = {
         "accept": "application/json",
-        "Authorization": f"Bearer {token}"
+        "Authorization": f"Bearer {token}",
+        "User-Agent": "postman/1.0"
     }
 
     params = {

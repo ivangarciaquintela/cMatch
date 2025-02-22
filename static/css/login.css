@@ -7,7 +7,7 @@
 }
 
 body {
-
+    background-image: url("../img/index2.gif");
     background-size: cover; 
     background-repeat: no-repeat;
     background-position: center center;
