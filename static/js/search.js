@@ -150,7 +150,7 @@ function displaySearchResults(results) {
 
     results.forEach(product => {
         const productCard = document.createElement('div');
-        productCard.className = 'bg-white rounded-lg shadow-md overflow-hidden mb-4 product-card'; // mb-4 for spacing
+        productCard.className = 'bg-white shadow overflow-hidden mb-4 product-card'; // mb-4 for spacing
 
         const productLink = document.createElement('a');
         productLink.href = product.link;
@@ -191,7 +191,7 @@ function displaySearchResults(results) {
 
         const wishlistButton = document.createElement('button');
         wishlistButton.textContent = 'Add to Wishlist';
-        wishlistButton.className = 'mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200';
+        wishlistButton.className = 'mt-2 px-4 py-2 bg-white border border-black text-black  hover:bg-black hover:text-white transition duration-200';
 
         wishlistButton.onclick = () => {
             addToWishlist(product.id);

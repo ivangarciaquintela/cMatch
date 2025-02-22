@@ -25,3 +25,12 @@ async def register(request: Request):
 @router.get("/search", response_class=HTMLResponse)
 async def search(request: Request):
     return templates.TemplateResponse("search.html", {"request": request}) 
+
+
+@router.get("/product", response_class=HTMLResponse)
+async def search(request: Request):
+    return templates.TemplateResponse("product.html", {"request": request}) 
+
+@router.get("/visual", response_class=HTMLResponse)
+async def search(request: Request):
+    return templates.TemplateResponse("visual.html", {"request": request}) 

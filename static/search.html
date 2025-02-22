@@ -7,13 +7,16 @@
     <!--  <link rel="stylesheet" href="/static/css/search.css">  -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <nav class="nav-bar">
-            <div class="logo">cMatch</div>
-            <div class="nav-links">
-                <a href="/agent" class="nav-btn">AI ADVISOR</a>
-                <button id="logoutBtn" class="nav-btn">LOG OUT</button>
+<body class="bg-white-100">  <!--  Añadido un fondo gris claro.  Cambia a bg-white si prefieres blanco.  -->
+    <div class="container mx-auto px-4 py-8">  <!-- Contenedor principal.  mx-auto lo centra horizontalmente.  px-4 y py-8 añaden padding. -->
+        <nav class="nav-bar flex items-center justify-between mb-8">  <!--  Flexbox para la navegación -->
+            <div class="logo text-2xl font-bold text-black-800">cMatch</div>  <!--  Estilos para el logo -->
+            <div class="nav-links flex space-x-16"> <!-- Flexbox y espaciado entre los enlaces -->
+                <a href="/user"  class="text-black-700 hover:underline">USER</a>
+                <a href="/wishlist"  class="text-black-700 hover:underline">WISHLIST</a>
+                <a href="/closset"  class="text-black-700 hover:underline">CLOSSET</a>
+                <a href="/stylia"  class="text-black-700 hover:underline">STYLIA</a> <!-- Estilo para botón "STYLIA" -->
+                <button id="logoutBtn" class="nav-btn bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">LOG OUT</button> 
             </div>
         </nav>
 
