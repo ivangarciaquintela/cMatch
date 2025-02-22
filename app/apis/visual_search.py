@@ -1,7 +1,7 @@
 # visual_search.py
 from .inditex_api import InditexAPI
 import requests
-from config import API_TOKEN, VISUAL_SEARCH_BASE_URL
+from config import  VISUAL_SEARCH_BASE_URL
 import json
 
 def search_by_image(image_url, page=1, per_page=5):

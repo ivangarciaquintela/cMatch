@@ -1,3 +1,4 @@
+
 /* Base styles */
 * {
     margin: 0;
@@ -6,13 +7,17 @@
 }
 
 body {
+    background-image: url("../img/index2.gif");
+    background-size: cover; 
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
     font-family: Arial, sans-serif;
     line-height: 1.6;
-    background-color: #f4f4f4;
+    background-color: #ffffff;
 }
 
 .container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -23,9 +28,10 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background-color: #333;
+    background-color: none;
     color: white;
-    margin-bottom: 2rem;
+    margin-bottom: 10rem;
+    width: 100%;
 }
 
 .logo {
@@ -37,9 +43,8 @@ body {
     padding: 0.5rem 1rem;
     margin-left: 1rem;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    background-color: #4CAF50;
+    background-color: black;
     color: white;
 }
 
@@ -50,10 +55,14 @@ body {
 }
 
 .auth-form {
-    background-color: white;
+    /* 1. Fondo con transparencia (blanco con 20% de opacidad) */
+    background-color: rgba(255, 252, 252, 0.3); /* Blanco con 20% de opacidad */
+    box-shadow: 0 0 15px 5px rgba(0, 0, 0, 0.2); 
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border : none;
+    text-align: center;
+    position: relative; /* Importante para z-index, si es necesario (ver más abajo) */
+        
 }
 
 .auth-form h2 {
@@ -65,8 +74,9 @@ body {
     width: 100%;
     padding: 0.5rem;
     margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: 1px solid black;
+    color : black;
+    display: inline-block; 
 }
 
 /* Search Section */
@@ -90,8 +100,16 @@ body {
     border-radius: 4px;
 }
 
+.visual-search-section {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+
 /* Results and History */
-.search-results,
+.search-results,su
 .wishlist-section,
 .history-section {
     background-color: white;
@@ -107,13 +125,28 @@ body {
 
 button {
     padding: 0.5rem 1rem;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
+    color: black;
+    background-color: none;
+    border: 1px solid black;
     cursor: pointer;
+    font-size: 1.2rem;
 }
 
 button:hover {
-    background-color: #45a049;
+    text-decoration: underline;
+    font-size: 1.2rem;
 } 
+
+.product-card {
+    border: 1px black solid;
+    margin : 5px;
+    padding : 10 px;
+}
+.product-card * {
+    margin: 25px; /* Margen para *todos* los elementos dentro de .product-card */
+}
+
+.imageUpload {
+    background-color: white;
+    color: black;
+}

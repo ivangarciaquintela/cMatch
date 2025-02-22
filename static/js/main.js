@@ -122,17 +122,46 @@ async function handleSearch() {
 function displaySearchResults(results) {
     const resultsContainer = document.getElementById('searchResults');
     resultsContainer.innerHTML = '';
+    const resultsHeader = document.createElement('h2');
+    resultsHeader.textContent = 'Results:';  // O "Search Results:" si prefieres
+    resultsContainer.appendChild(resultsHeader);
 
     results.forEach(product => {
         const productElement = document.createElement('div');
         productElement.className = 'product-card';
-        productElement.innerHTML = `
+
+        // Crear el enlace que envuelve todo
+        const productLink = document.createElement('a');
+        productLink.href = product.link;
+        productLink.style.textDecoration = 'none'; // Quita el subrayado predeterminado del enlace
+        productLink.style.color = 'inherit'; // Hereda el color del texto del padre (para evitar el azul predeterminado)
+
+        // Construir el contenido HTML del producto
+        let productHTML = `
             <h3>${product.name}</h3>
-            <p>${product.brand}</p>
-            <p>Price: ${product.price}</p>
+            <p style="font-weight: bold;">${product.brand.toUpperCase()}</p>
+            <p>`;
+
+        // Manejar la estructura del precio
+        if (product.price && product.price.value && product.price.value.current !== undefined && product.price.currency) {
+            productHTML += `Price: ${product.price.value.current} ${product.price.currency}`;
+        } else {
+            productHTML += 'Price: N/A'; // Muestra N/A si no hay precio
+        }
+
+        productHTML += `</p>
             <button onclick="addToWishlist(${product.id})">Add to Wishlist</button>
-        `;
-        resultsContainer.appendChild(productElement);
+        `; // No hay problema con addToWishlist aquí, porque se ejecuta *después* de cargar
+
+        productElement.innerHTML = productHTML;
+
+
+        // Agregar el contenido del producto al enlace
+        productLink.appendChild(productElement);
+        // Agregar el enlace al contenedor de resultados
+        resultsContainer.appendChild(productLink);
+
+
     });
 }
 
@@ -178,6 +207,60 @@ async function getCurrentUser() {
         }
     } catch (error) {
         console.error('Error fetching user:', error);
+    }
+}
+
+async function handleVisualSearch() {
+    const fileInput = document.getElementById('imageUpload');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('Please select an image.');
+        return;
+    }
+
+     if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file.');
+        return;
+    }
+
+
+    // Display image preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px;">`;
+    }
+    reader.readAsDataURL(file); // Read as Data URL for preview
+
+
+    const formData = new FormData();  // Use FormData for file uploads
+    formData.append('file', file);
+    try {
+        const response = await fetch('/search/visual/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`  // Send the token!
+                // Don't set Content-Type for FormData; browser sets it
+            },
+            body: formData  // Send FormData
+        });
+
+
+        if (response.ok) {
+            const results = await response.json();
+            displaySearchResults(results);
+        } else if (response.status === 401) {
+            alert('Unauthorized. Please log in.'); // Handle unauthorized access
+            showForm('login');
+        }
+         else {
+            const errorData = await response.json();
+            alert(`Search failed: ${errorData.detail}`);
+        }
+    } catch (error) {
+        console.error('Visual search error:', error);
+        alert('An error occurred during visual search.');
     }
 }
 

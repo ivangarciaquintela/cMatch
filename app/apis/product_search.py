@@ -11,14 +11,14 @@ def search_products(query, brand, page=1, per_page=5):
     """
     api = InditexAPI()  # Create an instance of InditexAPI
     token = api.get_token()  # Get the token
-
+    print(token)
     if not token:
         print("Error: No se pudo obtener el token de autenticación.")
         return None
 
     headers = {
         "accept": "application/json",
-        "Authorization": f"Bearer {token}"  # Use the obtained token
+        "Authorization": f"Bearer {token}", # Use the obtained token
     }
     params = {
         "query": query,
@@ -31,6 +31,7 @@ def search_products(query, brand, page=1, per_page=5):
         # Use VISUAL_SEARCH_BASE_URL,  OR  create and use a separate PRODUCT_SEARCH_BASE_URL in config.py
         response = requests.get(PRODUCT_SEARCH_BASE_URL, headers=headers, params=params)  # Or your product search URL
         response.raise_for_status()
+        print(response.json)
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error en Product Search: {e}")

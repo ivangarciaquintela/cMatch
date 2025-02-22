@@ -22,13 +22,13 @@ class InditexAPI:
             scope:  Alcance (scope) solicitado.
             user_agent:  Valor para la cabecera User-Agent.
         """
-        self.token_url = TOKEN_URL # Now uses the config values.
+        self.token_url = TOKEN_URL
         self.client_id = CLIENT_ID
         self.client_secret = CLIENT_SECRET
         self.scope = scope
         self.user_agent = user_agent
-        self._token = None  # Almacena el token actual
-        self._token_expiration = None  # Almacena la fecha/hora de expiración
+        self._token = None  
+        self._token_expiration = None  
 
 
     def get_token(self):
@@ -57,11 +57,11 @@ class InditexAPI:
 
         try:
             response = requests.post(self.token_url, headers=headers, auth=auth, data=data)
-            response.raise_for_status()  # Lanza excepción si hay error HTTP (4xx, 5xx)
+            response.raise_for_status()  
             token_data = response.json()
 
             self._token = token_data["id_token"]
-            expires_in = token_data["expires_in"]  # Segundos hasta expiración
+            expires_in = token_data["expires_in"] 
 
             # Calculamos el tiempo de expiración (con un pequeño margen de seguridad)
             self._token_expiration = datetime.now() + timedelta(seconds=expires_in - 60)  # Restamos 60 segundos
