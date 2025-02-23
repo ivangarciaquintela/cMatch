@@ -1,4 +1,3 @@
-
         async function getRecommendations() {
             const queryInput = document.getElementById('queryInput');
             const loading = document.getElementById('loading');
@@ -19,6 +18,7 @@
             askButton.classList.add('opacity-50');
             
             try {
+                console.log('Sending request for:', query); // Debug log
                 const response = await fetch(
                     `/agent/clothing-recommendations/?query=${encodeURIComponent(query)}`,
                     {
@@ -39,31 +39,22 @@
                 }
 
                 const data = await response.json();
+                console.log('Received response:', data); // Debug log
 
                 if (data.status === 'error') {
                     throw new Error(data.message);
                 }
 
-                // Clean and format the message
-                let formattedMessage = data.message || '';
-                formattedMessage = formattedMessage
-                    .replace(/\\\\/g, '')
-                    .replace(/\\n/g, '\n')
-                    .replace(/\\/g, '')
-                    .trim();
-
-                // Convert markdown and newlines to HTML
-                formattedMessage = formattedMessage
-                    .split('\n')
-                    .filter(line => line.trim() !== '')
-                    .map(line => line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'))  //  Keep the strong tags
-                    .join('<br>');
-
-                // Display the formatted message
                 recommendations.classList.remove('hidden');
-                if (formattedMessage) {
+                if (data.message) {
+                    // Simple formatting of the message
+                    const formattedMessage = data.message
+                        .replace(/\\\\/g, '')  // Remove double backslashes
+                        .replace(/\\n/g, '<br>') // Convert \n to line breaks
+                        .replace(/\\/g, '');  // Remove remaining backslashes
+
                     recommendations.innerHTML = `
-                        <div class="prose prose-lg max-w-none">
+                        <div class="space-y-2 text-left">
                             ${formattedMessage}
                         </div>
                     `;
@@ -76,7 +67,7 @@
                 }
 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error:', error); // Debug log
                 recommendations.classList.remove('hidden');
                 recommendations.innerHTML = `
                     <div class="bg-red-50 text-red-600 p-4 rounded-lg">
@@ -90,7 +81,7 @@
             }
         }
 
-        // Add event listener for Enter key in textarea (keeping your existing logic)
+        // Add event listener for Enter key in textarea
         document.getElementById('queryInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -98,7 +89,7 @@
             }
         });
 
-        // Logout functionality (keeping your existing logic)
+        // Logout functionality
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('authToken');
             window.location.href = '/login';

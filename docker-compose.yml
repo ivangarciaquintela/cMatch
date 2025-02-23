@@ -12,19 +12,21 @@ services:
       - INTERNAL_TOKEN=YOU-API-KEY
     depends_on:
       - db
-      - agent
     command: uvicorn app.main:app --host 0.0.0.0 --reload
 
   agent:
     build: 
-      context: .
-      dockerfile: Dockerfile.agent
+      context: ./agent
+      dockerfile: Dockerfile
     ports:
       - "8001:8001"
     environment:
-      - HF_TOKEN=YOU-API-KEY
       - INTERNAL_TOKEN=YOU-API-KEY
-    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+      - HF_TOKEN=YOU-API-KEY
+    volumes:
+      - ./agent:/app
+    depends_on:
+      - api
 
   db:
     image: postgres:13

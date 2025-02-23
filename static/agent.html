@@ -6,7 +6,26 @@
     <title>cMatch - Stylia</title>
     <script src="https://cdn.tailwindcss.com"></script>  <!-- Add Tailwind CSS -->
     <script src="/static/js/agent.js"></script>
-
+    <style>
+        .recommendation-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+        }
+        .recommendation-item:last-child {
+            border-bottom: none;
+        }
+        .product-link {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .product-link:hover {
+            text-decoration: underline;
+        }
+        .price-tag {
+            color: #059669;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body  class="bg-cover bg-no-repeat bg-[url(/static/img/stylia.png)] flex items-center justify-center">
     <div class="container mx-auto p-5">

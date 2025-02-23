@@ -1,4 +1,6 @@
 fastapi
 uvicorn
-requests
 smolagents
+requests
+python-dotenv
+pyyaml

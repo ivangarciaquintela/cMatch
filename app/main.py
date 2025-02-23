@@ -11,6 +11,7 @@ import aiofiles
 from datetime import datetime
 import requests
 import json
+import logging
 
 # Use relative imports since we're inside the app package
 from .models.database import User, Base
@@ -50,6 +51,10 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# Add near the top of the file, after imports
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # User management endpoints
 @app.post("/users/", response_model=schemas.User)
@@ -94,18 +99,18 @@ async def search_products_endpoint(
     brand: str = None,
     page: int = 1,
     per_page: int = 10,
-    token: str = Depends(oauth2_scheme),
-    authorization: str = Header(None)
+    # token: str = Depends(oauth2_scheme),
+    # authorization: str = Header(None)
 ):
     # Allow internal requests from the agent service
-    if authorization == f"Bearer {os.getenv('INTERNAL_TOKEN')}":
-        pass
-    # For regular users, verify their token
-    elif not token:
-        raise HTTPException(
-            status_code=401,
-            detail="Not authenticated"
-        )
+    # if authorization == f"Bearer {os.getenv('INTERNAL_TOKEN')}":
+    #     pass
+    # # For regular users, verify their token
+    # elif not token:
+    #     raise HTTPException(
+    #         status_code=401,
+    #         detail="Not authenticated"
+    #     )
 
     results = search_products(
         query,
@@ -198,7 +203,7 @@ app.include_router(views_router)
 app.include_router(user_items_router, prefix="/api", tags=["user items"])
 app.include_router(user_profile_router, prefix="/api/user", tags=["user profile"])
 
-# Add this endpoint after your other endpoints
+# Update the clothing recommendations endpoint
 @app.get("/agent/clothing-recommendations/")
 async def clothing_recommendations_endpoint(
     query: str,
@@ -208,37 +213,33 @@ async def clothing_recommendations_endpoint(
     Get clothing recommendations based on natural language query.
     """
     try:
-        # Forward the request to the agent service using requests
+        logger.info(f"Forwarding recommendation request to agent service: {query}")
         response = requests.get(
             f"http://agent:8001/recommendations",
             params={"query": query},
             timeout=300  # 5 minute timeout
         )
-        response.raise_for_status()
-        data = response.json()
         
-        # Ensure we're returning a properly formatted response
-        if isinstance(data, dict) and "status" in data and "message" in data:
-            return data
-        else:
-            return {
-                "status": "success",
-                "message": data if isinstance(data, str) else json.dumps(data)
-            }
+        logger.info(f"Agent service responded with status code: {response.status_code}")
+        if not response.ok:
+            logger.error(f"Agent service error response: {response.text}")
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Agent service error: {response.text}"
+            )
+        
+        data = response.json()
+        logger.info("Successfully parsed agent response")
+        return data
             
     except requests.Timeout:
+        logger.error("Request to agent service timed out")
         raise HTTPException(
             status_code=504,
             detail="Request to agent service timed out"
         )
-    except requests.RequestException as e:
-        print(f"Agent service error: {str(e)}")  # Add logging
-        raise HTTPException(
-            status_code=500,
-            detail=f"Agent service error: {str(e)}"
-        )
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")  # Add logging
+        logger.error(f"Unexpected error: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail="An unexpected error occurred"
