@@ -185,6 +185,7 @@ async function handleVisualSearch() {
     showLoading();
 
     try {
+        // For URL-based search, use GET method with image_url parameter
         const response = await fetch(`${API_BASE_URL}/search/visual/?image_url=${encodeURIComponent(imageUrl)}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -220,22 +221,105 @@ function displayResults(results) {
     results.forEach(product => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
+        
+        // Product info
         productCard.innerHTML = `
             <h3>${product.name}</h3>
             <p><strong>${product.brand.toUpperCase()}</strong></p>
             <p>${product.price?.value?.current ? `Price: ${product.price.value.current} ${product.price.currency}` : 'Price: N/A'}</p>
+            <div class="button-container">
+                <button class="action-button wishlist-btn">Add to Wishlist</button>
+                <button class="action-button closet-btn">Add to Closet</button>
+            </div>
         `;
+
+        // Add event listeners for the buttons
+        const wishlistBtn = productCard.querySelector('.wishlist-btn');
+        const closetBtn = productCard.querySelector('.closet-btn');
+
+        wishlistBtn.addEventListener('click', async () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Please log in first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/wishlist/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        item_name: product.name,
+                        item_description: product.description || '',
+                        item_price: product.price?.value?.current || 0,
+                        item_url: product.link,
+                        item_image: product.imageUrl || '',
+                        item_brand: product.brand || '',
+                        item_category: product.category || ''
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Item added to wishlist successfully!');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to add item to wishlist');
+                }
+            } catch (error) {
+                console.error('Error adding to wishlist:', error);
+                alert(error.message || 'Failed to add item to wishlist');
+            }
+        });
+
+        closetBtn.addEventListener('click', async () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Please log in first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/closet/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        item_name: product.name,
+                        item_description: product.description || '',
+                        item_price: product.price?.value?.current || 0,
+                        item_url: product.link,
+                        item_image: product.imageUrl || '',
+                        item_brand: product.brand || '',
+                        item_category: product.category || ''
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Item added to closet successfully!');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to add item to closet');
+                }
+            } catch (error) {
+                console.error('Error adding to closet:', error);
+                alert(error.message || 'Failed to add item to closet');
+            }
+        });
+
         resultsContainer.appendChild(productCard);
     });
 }
 
-// Update the handleImageSelection function to properly handle the image data
+// Update the handleImageSelection function
 async function handleImageSelection() {
     try {
-        // First, capture the screenshot
         chrome.runtime.sendMessage({action: 'captureTab'}, async function(response) {
             if (response && response.imageData) {
-                // Show the screenshot in a canvas for selection
                 const resultsContainer = document.getElementById('results');
                 resultsContainer.innerHTML = `
                     <div class="screenshot-preview">
@@ -273,7 +357,7 @@ async function handleImageSelection() {
     }
 }
 
-// Update the initializeSelection function to properly handle the image data
+// Update the initializeSelection function
 function initializeSelection(canvas) {
     const selectionBox = document.getElementById('selection-box');
     let isSelecting = false;
@@ -325,60 +409,63 @@ function initializeSelection(canvas) {
             const selection = selectionBox.getBoundingClientRect();
             const canvasRect = canvas.getBoundingClientRect();
             
-            // Create a new canvas for the cropped image
+            // Create a smaller canvas for the cropped image
             const cropCanvas = document.createElement('canvas');
             const ctx = cropCanvas.getContext('2d');
             
-            // Calculate selection coordinates relative to canvas
+            // Calculate the selection coordinates
             const x = (selection.left - canvasRect.left) * (canvas.width / canvasRect.width);
             const y = (selection.top - canvasRect.top) * (canvas.height / canvasRect.height);
             const width = selection.width * (canvas.width / canvasRect.width);
             const height = selection.height * (canvas.height / canvasRect.height);
             
-            cropCanvas.width = width;
-            cropCanvas.height = height;
+            // Set maximum dimensions
+            const MAX_SIZE = 800;
+            let targetWidth = width;
+            let targetHeight = height;
             
-            // Draw the selected portion
-            ctx.drawImage(
-                canvas,
-                x, y, width, height,
-                0, 0, width, height
-            );
-
-            // Get base64 data URL first
-            const dataUrl = cropCanvas.toDataURL('image/jpeg', 0.95);
+            // Scale down if either dimension is too large
+            if (width > MAX_SIZE || height > MAX_SIZE) {
+                const ratio = Math.min(MAX_SIZE / width, MAX_SIZE / height);
+                targetWidth = width * ratio;
+                targetHeight = height * ratio;
+            }
             
-            // Convert data URL to blob
-            const response = await fetch(dataUrl);
-            const blob = await response.blob();
+            // Set canvas size to the target dimensions
+            cropCanvas.width = targetWidth;
+            cropCanvas.height = targetHeight;
+            
+            // Draw the selected portion scaled down
+            ctx.drawImage(canvas, x, y, width, height, 0, 0, targetWidth, targetHeight);
 
-            // Verify blob was created correctly
-            if (!(blob instanceof Blob)) {
-                throw new Error('Failed to create valid blob from image');
-            }
+            // Convert to blob with lower quality
+            cropCanvas.toBlob(async (blob) => {
+                console.log('Blob created:', blob);
+                
+                if (!blob) {
+                    throw new Error('Failed to create blob from canvas');
+                }
 
-            console.log('Blob created:', blob.type, blob.size);
+                const formData = new FormData();
+                formData.append('file', blob);
 
-            // Create FormData and append the blob
-            const formData = new FormData();
-            formData.append('file', blob, 'screenshot.jpg');
+                const response = await fetch(`${API_BASE_URL}/search/visual/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
 
-            // Send to API
-            const apiResponse = await fetch(`${API_BASE_URL}/search/visual/`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
+                if (response.ok) {
+                    const results = await response.json();
+                    displayResults(results);
+                } else {
+                    const errorData = await response.json().catch(() => ({ detail: 'Unknown error occurred' }));
+                    throw new Error(errorData.detail || 'API request failed');
+                }
+            }, 'image/jpeg', 0.8); // Reduced quality to 80%
 
-            if (apiResponse.ok) {
-                const results = await apiResponse.json();
-                displayResults(results);
-            } else {
-                const errorData = await apiResponse.json().catch(() => ({ detail: 'Unknown error occurred' }));
-                throw new Error(errorData.detail || 'API request failed');
-            }
         } catch (error) {
             console.error('Visual search error:', error);
             alert(`Visual search failed: ${error.message}`);

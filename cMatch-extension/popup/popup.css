@@ -233,26 +233,24 @@ button:hover {
 
 .button-container {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    width: 100%;
-    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
 }
 
-.button-container button {
-    padding: 8px 16px;
+.action-button {
+    flex: 1;
+    padding: 8px;
+    background: white;
+    border: 1px solid black;
     border-radius: 4px;
     cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
 }
 
-.button-container .secondary-button {
-    background: #fff;
-    color: #000;
-    border: 1px solid #000;
-}
-
-.button-container .secondary-button:hover {
-    background: #f0f0f0;
+.action-button:hover {
+    background: black;
+    color: white;
 }
 
 .canvas-container {
