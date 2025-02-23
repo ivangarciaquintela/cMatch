@@ -70,7 +70,7 @@ function displayItems(items) {
 
     items.forEach((item, index) => { // Add index here
         const itemElement = document.createElement('div');
-        itemElement.className = 'bg-white shadow rounded-lg p-4 flex justify-between items-center mb-4'; // Added mb-4 for spacing
+        itemElement.className = 'bg-white bg-opacity-70 shadow rounded-lg p-4 flex justify-between items-center mb-4'; // Added mb-4 for spacing
 
         const itemInfo = document.createElement('div');
         itemInfo.innerHTML = `
