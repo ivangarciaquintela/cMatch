@@ -4,151 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>cMatch - Stylia</title>
-    <link rel="stylesheet" href="/static/css/style.css">  <!-- Keep this if you have specific styles there -->
     <script src="https://cdn.tailwindcss.com"></script>  <!-- Add Tailwind CSS -->
+    <script src="/static/js/agent.js"></script>
+
 </head>
-<body class="bg-white-100">
-    <div class="container mx-auto">
-        <nav class="nav-bar flex items-center justify-between mb-8">  <!--  Flexbox para la navegación -->
-            <div class="logo text-2xl font-bold text-black"><a href="/search">cMatch</a></div>  <!--  Estilos para el logo -->
-            <div class="nav-links flex space-x-16"> <!-- Flexbox y espaciado entre los enlaces -->
-                <a href="/user"  class="text-black hover:underline">USER</a>
-                <a href="/wishlist"  class="text-black hover:underline">WISHLIST</a>
-                <a href="/closet"  class="text-black hover:underline">CLOSET</a>
-                <a href="/search"  class="text-black hover:underline">SEARCH</a> <!-- Estilo para botón "STYLIA" -->
-                <button id="logoutBtn" class="nav-btn bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">LOG OUT</button> 
+<body  class="bg-cover bg-no-repeat bg-[url(/static/img/stylia.png)] flex items-center justify-center">
+    <div class="container mx-auto p-5">
+        <nav class="nav-bar flex items-center justify-between mb-8">
+            <div class="logo text-2xl font-bold text-black"><a href="/search">cMatch</a></div>
+            <div class="nav-links flex space-x-16">
+                <a href="/user" class="text-black hover:underline">USER</a>
+                <a href="/wishlist" class="text-black hover:underline">WISHLIST</a>
+                <a href="/closet" class="text-black hover:underline">CLOSET</a>
+                <a href="/search" class="text-black hover:underline">SEARCH</a>
+                <button id="logoutBtn" class="nav-btn bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">LOG OUT</button>
             </div>
         </nav>
-        <div class="max-w-3xl mx-auto my-8 p-6 bg-white rounded-lg border shadow-md">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Stylia</h2>
-            <p class="text-gray-600 mb-4">Describe what you're looking for, and I'll help you find the perfect outfit!</p>
-
-            <textarea
-                id="queryInput"
-                class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                rows="4"
-                placeholder="Example: What should I wear for a formal night out?"
-            ></textarea>
-
-            <button id="askButton" onclick="getRecommendations()" class="mt-4 px-6 py-2 bg-white text-black rounded hover:bg-black hover:text-white transition">Get Recommendations</button>
-
-            <div id="loading" class="hidden text-center p-8"> <!-- Changed display:none to hidden -->
-                <div class="inline-block w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-                <p class="mt-4 text-gray-600">Our AI is crafting your perfect outfit recommendation...</p>
-                <p class="text-gray-500">(This may take a while)</p>
-            </div>
-
-            <div id="recommendations" class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 hidden">
-                <!-- Recommendations will be displayed here -->
+        <div class="max-w-3xl mx-auto my-8 p-6 bg-white rounded-lg shadow-md flex items-center justify-center bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-60 border border-gray-200">
+            <div class="w-full text-center">  <!-- Centrado horizontal del contenido -->
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Stylia</h2>
+                <p class="text-gray-600 mb-4">Describe what you're looking for, and I'll help you find the perfect outfit!</p>
+        
+                <textarea
+                    id="queryInput"
+                    class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    rows="4"
+                    placeholder="Example: What should I wear for a formal night out?"
+                ></textarea>
+        
+                <button id="askButton" onclick="getRecommendations()" class="mt-4 px-6 py-2 bg-white text-black rounded hover:bg-black hover:text-white transition">Get Recommendations</button>
+        
+                <div id="loading" class="hidden text-center p-8">
+                    <div class="inline-block w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+                    <p class="mt-4 text-gray-600">Our AI is crafting your perfect outfit recommendation...</p>
+                    <p class="text-gray-500">(This may take a while)</p>
+                </div>
+        
+                <div id="recommendations" class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                    <!-- Recommendations will be displayed here -->
+                </div>
             </div>
         </div>
     </div>
-
-    <script>
-        async function getRecommendations() {
-            const queryInput = document.getElementById('queryInput');
-            const loading = document.getElementById('loading');
-            const recommendations = document.getElementById('recommendations');
-            const askButton = document.getElementById('askButton');
-
-            const query = queryInput.value.trim();
-            if (!query) {
-                alert('Please enter a query');
-                return;
-            }
-
-            // Show loading state and clear previous results
-            loading.classList.remove('hidden');
-            recommendations.classList.add('hidden');
-            recommendations.innerHTML = '';
-            askButton.disabled = true;
-            askButton.classList.add('opacity-50');
-            
-            try {
-                const response = await fetch(
-                    `/agent/clothing-recommendations/?query=${encodeURIComponent(query)}`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                        }
-                    }
-                );
-
-                if (response.status === 401) {
-                    window.location.href = '/login';
-                    return;
-                }
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Failed to get recommendations');
-                }
-
-                const data = await response.json();
-
-                if (data.status === 'error') {
-                    throw new Error(data.message);
-                }
-
-                // Clean and format the message
-                let formattedMessage = data.message || '';
-                formattedMessage = formattedMessage
-                    .replace(/\\\\/g, '')
-                    .replace(/\\n/g, '\n')
-                    .replace(/\\/g, '')
-                    .trim();
-
-                // Convert markdown and newlines to HTML
-                formattedMessage = formattedMessage
-                    .split('\n')
-                    .filter(line => line.trim() !== '')
-                    .map(line => line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'))  //  Keep the strong tags
-                    .join('<br>');
-
-                // Display the formatted message
-                recommendations.classList.remove('hidden');
-                if (formattedMessage) {
-                    recommendations.innerHTML = `
-                        <div class="prose prose-lg max-w-none">
-                            ${formattedMessage}
-                        </div>
-                    `;
-                } else {
-                    recommendations.innerHTML = `
-                        <div class="text-gray-500">
-                            No recommendations available at this time.
-                        </div>
-                    `;
-                }
-
-            } catch (error) {
-                console.error('Error:', error);
-                recommendations.classList.remove('hidden');
-                recommendations.innerHTML = `
-                    <div class="bg-red-50 text-red-600 p-4 rounded-lg">
-                        ${error.message || 'An error occurred while getting recommendations'}
-                    </div>
-                `;
-            } finally {
-                loading.classList.add('hidden');
-                askButton.disabled = false;
-                askButton.classList.remove('opacity-50');
-            }
-        }
-
-        // Add event listener for Enter key in textarea (keeping your existing logic)
-        document.getElementById('queryInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                getRecommendations();
-            }
-        });
-
-        // Logout functionality (keeping your existing logic)
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('authToken');
-            window.location.href = '/login';
-        });
-    </script>
 </body>
 </html>

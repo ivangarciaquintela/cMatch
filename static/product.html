@@ -6,7 +6,8 @@
     <title>cMatch - Product Search</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-white-100">  <!-- Agrego un fondo gris claro -->
+<body  class="bg-cover bg-no-repeat bg-[url(/static/img/products.png)] flex items-center justify-center"></body>
+
     <div class="container mx-auto p-5"> <!-- Contenedor principal, centrado y con padding -->
         <nav class="nav-bar flex items-center justify-between mb-8">  <!--  Flexbox para la navegación -->
             <div class="logo text-2xl font-bold text-black-800"><a href="/search">cMatch</a></div>  <!--  Estilos para el logo -->
@@ -22,9 +23,9 @@
         <!-- Search Section -->
         <div class="mt-8"> <!-- Margen superior -->
             <h2 class="text-2xl font-semibold mb-4">Product Search</h2> <!-- Título con estilo -->
-            <div class="bg-white p-4 shadow"> <!-- Contenedor con fondo, padding, bordes y sombra -->
-                <input type="text" id="searchQuery" placeholder="Search for products..." class="w-full px-4 py-2 border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> <!-- Estilo para el input -->
-                <input type="text" id="searchBrand" placeholder="Brand (optional)" class="w-full px-4 py-2 border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">   <!-- Estilo para el input de marca-->
+            <div class="bg-white p-4 shadow bg-opacity-50"> <!-- Contenedor con fondo, padding, bordes y sombra -->
+                <input type="text" id="searchQuery" placeholder="Search for products..." class="w-full bg-opacity-50 px-4 py-2 border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> <!-- Estilo para el input -->
+                <input type="text" id="searchBrand" placeholder="Brand (optional)" class="w-full px-4 py-2 border bg-opacity-50 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">   <!-- Estilo para el input de marca-->
                  <button onclick="handleSearch()" class="w-full px-4 py-2 text-black-700 hover:bg-black hover:text-white transition duration-200">Search</button>  <!-- Botón de búsqueda -->
             </div>
         </div>
