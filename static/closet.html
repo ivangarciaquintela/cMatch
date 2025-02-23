@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cMatch - Closet</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>cMatch - Closet</title>¡
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/closet.js"></script>
 </head>
-<body class="bg-white-100">
+<body  class="bg-cover bg-no-repeat bg-[url(/static/img/closet.png)] flex items-center justify-center"></body>
     <div class="container mx-auto p-5">
         <nav class="nav-bar flex items-center justify-between mb-8">
-            <div class="logo text-2xl font-bold text-black-800"><a href="/search">cMatch</a></div>
+            <div class="logo text-2xl font-bold text-black"><a href="/search">cMatch</a></div>
             <div class="nav-links flex space-x-16">
-                <a href="/user" class="text-black-700 hover:underline">USER</a>
-                <a href="/wishlist" class="text-black-700 hover:underline">WISHLIST</a>
-                <a href="/closet" class="text-black-700 hover:underline">CLOSET</a>
-                <a href="/stylia" class="text-black-700 hover:underline">STYLIA</a>
+                <a href="/user" class="text-black hover:underline">USER</a>
+                <a href="/wishlist" class="text-black hover:underline">WISHLIST</a>
+                <a href="/closet" class="text-black hover:underline">CLOSET</a>
+                <a href="/stylia" class="text-black hover:underline">STYLIA</a>
                 <button id="logoutBtn" class="nav-btn bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">LOG OUT</button>
             </div>
         </nav>
@@ -26,111 +27,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Check authentication
-        function checkAuth() {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                window.location.href = '/login';
-                return null;
-            }
-            return token;
-        }
-
-        async function loadClosetItems() {
-            const token = checkAuth();
-            if (!token) return;
-
-            try {
-                const response = await fetch('/api/closet/list', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const items = await response.json();
-                    displayItems(items);
-                } else if (response.status === 401) {
-                    localStorage.removeItem('authToken');
-                    window.location.href = '/login';
-                }
-            } catch (error) {
-                console.error('Error loading closet:', error);
-            }
-        }
-
-        async function deleteItem(itemId) {
-            const token = checkAuth();
-            if (!token) return;
-
-            try {
-                const response = await fetch(`/api/closet/${itemId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    loadClosetItems(); // Reload the list
-                } else {
-                    const error = await response.json();
-                    alert(error.detail || 'Failed to delete item');
-                }
-            } catch (error) {
-                console.error('Error deleting item:', error);
-                alert('Failed to delete item');
-            }
-        }
-
-        function displayItems(items) {
-            const container = document.getElementById('closetItems');
-            container.innerHTML = '';
-
-            if (!items || items.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No items in closet</p>';
-                return;
-            }
-
-            items.forEach(item => {
-                const itemElement = document.createElement('div');
-                itemElement.className = 'bg-white shadow rounded-lg p-4 flex justify-between items-center';
-                
-                const itemInfo = document.createElement('div');
-                itemInfo.innerHTML = `
-                    <h3 class="font-bold">${item.item_name}</h3>
-                    ${item.item_description ? `<p class="text-gray-600">${item.item_description}</p>` : ''}
-                    ${item.price ? `<p class="text-gray-800">$${item.price}</p>` : ''}
-                    <p class="text-gray-500 text-sm">${new Date(item.added_date).toLocaleDateString()}</p>
-                `;
-
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.className = 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600';
-                deleteButton.onclick = () => deleteItem(item.item_id);
-
-                itemElement.appendChild(itemInfo);
-                itemElement.appendChild(deleteButton);
-                container.appendChild(itemElement);
-            });
-        }
-
-        // Handle logout
-        function handleLogout() {
-            localStorage.removeItem('authToken');
-            window.location.href = '/login';
-        }
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            loadClosetItems();
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', handleLogout);
-            }
-        });
-    </script>
+ 
 </body>
 </html> 
