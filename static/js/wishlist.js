@@ -54,7 +54,6 @@ async function deleteItem(itemId) {
         alert('Failed to delete item');
     }
 }
-
 function displayItems(items) {
     const container = document.getElementById('wishlistItems');
     container.innerHTML = '';
@@ -64,10 +63,14 @@ function displayItems(items) {
         return;
     }
 
-    items.forEach(item => {
+    // Add a wrapper for the scrolling functionality
+    const scrollableWrapper = document.createElement('div');
+    scrollableWrapper.className = 'overflow-y-auto max-h-[48rem]'; // Add Tailwind classes for scrolling and max height
+
+    items.forEach((item, index) => {
         const itemElement = document.createElement('div');
-        itemElement.className = 'bg-white bg-opacity-80 shadow rounded-lg p-4 flex justify-between items-center';
-        
+        itemElement.className = 'bg-white bg-opacity-80 shadow rounded-lg p-4 flex justify-between items-center mb-4'; // Added mb-4 for spacing between items
+
         const itemInfo = document.createElement('div');
         itemInfo.innerHTML = `
             <h3 class="font-bold">${item.item_name}</h3>
@@ -75,6 +78,18 @@ function displayItems(items) {
             ${item.price ? `<p class="text-gray-800">$${item.price}</p>` : ''}
             <p class="text-gray-500 text-sm">${new Date(item.added_date).toLocaleDateString()}</p>
         `;
+
+        // --- Image Container ---
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'mb-4';
+
+        const productImage = document.createElement('img');
+        // Construct the image path dynamically
+        productImage.src = `/static/img/prenda_${index + 1}.jpg`; // Use index + 1
+        productImage.alt = item.item_name || 'Product Image';
+        productImage.className = 'w-full h-48 object-cover rounded-t-lg';
+        imageContainer.appendChild(productImage);
+        itemElement.appendChild(imageContainer);
 
         // Create buttons container
         const buttonsContainer = document.createElement('div');
@@ -96,8 +111,10 @@ function displayItems(items) {
 
         itemElement.appendChild(itemInfo);
         itemElement.appendChild(buttonsContainer);
-        container.appendChild(itemElement);
+        scrollableWrapper.appendChild(itemElement); // Append to the scrollable wrapper
     });
+
+    container.appendChild(scrollableWrapper); // Append the wrapper to the main container
 }
 
 // Add the moveToCloset function
