@@ -4,6 +4,12 @@
 ## ¿Qué es y qué hace?
 cMatch permite a los usuarios realizar búsquedas de prendas de ropa mediante la similitud visual de imágenes o texto, mediante la API de Inditex. Además, ofrece funcionalidades como una wishlist y un armario digital para almacenar prendas encontradas y deseadas, un chatbot de recomendación para sugerencias personalizadas, y una extensión de navegador para facilitar la búsqueda de imágenes mientras navegan.
 
+<img src="static/img/Screenshot1.png" width="300">
+<img src="static/img/Screenshot2.png" width="300">
+
+[Demo Video](https://youtu.be/lHuwyi4sg6E)
+
+
 ## Cómo lo hicimos
 La aplicación fue desarrollada utilizando Python, FastAPI para el backend, y Tailwind CSS junto con Alpine.js para el frontend. Para el desarrollo colaborativo, despliegue y pruebas, utilizamos contenedores de Docker y GitHub para el control de versiones.
 
